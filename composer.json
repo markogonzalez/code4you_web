@@ -1,0 +1,7 @@
+{
+    "require": {
+        "guzzlehttp/guzzle": "^7.9",
+        "firebase/php-jwt": "^6.10",
+        "openpay/sdk": "^3.1"
+    }
+}
