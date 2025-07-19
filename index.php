@@ -1,3 +1,3 @@
 <?
-echo ":)";
+echo "Code4You";
 ?>
