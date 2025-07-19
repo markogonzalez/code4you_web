@@ -1,0 +1,108 @@
+
+<div class="row g-5 g-xl-8">
+    <h2 class="card-title align-items-start flex-column">
+        <span class="card-label fw-bold text-gray-800">Perfiles</span>
+    </h2>
+    <!--begin::Col-->
+    <div class="card card-flush h-xl-100" id="divTablaPerfiles">
+        <div class="card-header border-0 pt-6">
+            <div class="card-toolbar w100" data-modulo-id="3" data-permiso="w">
+                <button type="button" class="btn btn-primary btn-sm w100" onclick="limpiarForm('formPerfil');mostrar_ocultar('divFormPerfil','divTablaPerfiles');" ><i class="ki-duotone ki-plus-square fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i> Nuevo perfil</button>
+            </div>
+            <div class="card-title w100" style="margin: 0;">
+                <div class="d-flex align-items-center position-relative my-1 w100">
+                    <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-5">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                    </i>
+                    <input type="text" data-kt-customer-table-filter="search" class="form-control form-control-solid ps-12" placeholder="Buscar perfil" />
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <table class="table align-middle table-row-dashed fs-6 gy-5" id="tablaPerfiles"></table>
+            <!--end::Table-->
+        </div>
+        <!--end::Card body-->
+    </div>
+    <!-- Pantalla de formulario nuevo usuario o editar -->
+        <div class="card card-flush h-xl-100" id="divFormPerfil" style="display: none;">
+        <div class="card-header border-0 pt-6">
+            <div class="card-title flex-column">
+                <h2 class="mb-3" id="title_modal">Nuevo perfil</h2>
+                <div class="text-gray-500 fw-semibold fs-5" id="parrafo_modal">Ingresa los datos del perfil</div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <form id="formPerfil" class="form" action="" method="POST">
+                <input type="hidden" id="id_perfil" name="id_perfil" value="">
+                <div class="row g-9 mb-8">
+                    <div class="col-md-12">
+                        <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Nombre</label>
+                        <input type="text" class="form-control form-control-solid" placeholder="" id="nombre" name="nombre" />
+                    </div>
+                </div>
+                <div class="row g-9 mb-8">
+                    <div class="col-md-12">
+                        <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Descripción</label>
+                        <textarea rows="3" class="form-control form-control-solid" id="descripcion" name="descripcion"></textarea>
+                    </div>
+                </div>
+                <div class="row g-9 mb-8">
+                    <div class="col-md-12">
+                        <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Estatus</label>
+                        <select class="form-control form-control-solid" id="status" name="status">
+                            <option value="">Seleccione un estatus</option>
+                            <option value="1">Activo</option>
+                            <option value="0">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="button" onclick="limpiarForm('formPerfil');mostrar_ocultar('divTablaPerfiles','divFormPerfil')" class="btn btn-light me-3">Cancelar</button>
+                    <button id="btn_guardar" class="btn btn-primary">Guardar</button>
+                </div>
+                <!--end::Actions-->
+            </form>
+        </div>
+        <!--end::Card body-->
+    </div>
+    <!-- Pantalla de formulario permisos -->
+        <div class="card card-flush h-xl-100" id="divPermisos" style="display: none;">
+        <div class="card-header border-0 pt-6">
+            <div class="card-title flex-column">
+                <h2 class="mb-3" id="title_modal">Actualizar permisos</h2>
+                <div class="text-gray-500 fw-semibold fs-5" id="parrafo_modal">Selecciona los permisos por modulo</div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <form id="permisosForm" name="permisosForm">
+                <input type="hidden" name="id_perfil_permisos" id="id_perfil_permisos" value="">
+                <div class="card-body">
+                    <div class="table-responsive p-0">
+                        <table class="table table-hover text-nowrap">
+                            <thead>
+                                <tr>
+                                <th class="fw-600">#</th>
+                                <th class="fw-600">Módulo</th>
+                                <th class="fw-600">Ver</th>
+                                <th class="fw-600">Crear</th>
+                                <th class="fw-600">Actualizar</th>
+                                <th class="fw-600">Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla_permisos"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button type="button" onclick="limpiarForm('permisosForm');mostrar_ocultar('divTablaPerfiles','divPermisos')" class="btn btn-light me-3">Cancelar</button>
+                    <button  id="btn_guardar_permisos" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+        <!--end::Card body-->
+    </div>
+    <!--end::Col-->
+</div>

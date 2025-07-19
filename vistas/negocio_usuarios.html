@@ -1,0 +1,88 @@
+
+<div class="row g-5 g-xl-8">
+    <h2 class="card-title align-items-start flex-column">
+        <span class="card-label fw-bold text-gray-800">Trabajadores Nego</span>
+    </h2>
+    <!--begin::Col-->
+    <div class="card card-flush h-xl-100" id="divTablaUsuarios">
+        <div class="card-header border-0 pt-6">
+            <div class="card-toolbar w100" data-modulo-id="2" data-permiso="w">
+                <button type="button" class="btn btn-primary btn-sm w100" onclick="limpiarForm('formUsuario');mostrar_ocultar('divFormUsuario','divTablaUsuarios');" ><i class="ki-duotone ki-plus-square fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i> Nuevo trabajador</button>
+            </div>
+            <div class="card-title w100" style="margin: 0;">
+                <div class="d-flex align-items-center position-relative my-1 w100">
+                    <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-5">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                    </i>
+                    <input type="text" data-kt-customer-table-filter="search" class="form-control form-control-solid ps-12" placeholder="Buscar usuario" />
+                </div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <table class="table align-middle table-row-dashed fs-6 gy-5" id="tablaUsuarios">
+                <thead>
+                    <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                        <th></th>
+                        <th class="min-w-125px">Nombre</th>
+                        <th class="min-w-125px">Celular</th>
+                    </tr>
+                </thead>
+                <tbody class="fw-semibold text-gray-600" id="trusuarios"></tbody>
+            </table>
+            <!--end::Table-->
+        </div>
+        <!--end::Card body-->
+    </div>
+    <!-- Pantalla de formulario nuevo usuario o editar -->
+        <div class="card card-flush h-xl-100" id="divFormUsuario" style="display: none;">
+        <div class="card-header border-0 pt-6">
+            <div class="card-title flex-column">
+                <h2 class="mb-3" id="title_modal">Nuevo trabajador</h2>
+                <div class="text-gray-500 fw-semibold fs-5" id="parrafo_modal">Ingresa los datos del trabajador</div>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <form id="formUsuario" class="form" action="" method="POST">
+                <input type="hidden" id="id_usuario" name="id_usuario" value="">
+                <input type="hidden" id="id_servicio" name="id_servicio" value="">
+                <div class="row g-9 mb-8">
+                    <div class="col-md-4 fv-row">
+                        <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Nombre</label>
+                        <input type="text" class="form-control form-control-solid" placeholder="" id="nombre" name="nombre" />
+                    </div>
+                    <div class="col-md-4 fv-row">
+                        <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Apellidos</label>
+                        <input type="text" class="form-control form-control-solid" placeholder="" id="apellidos" name="apellidos" />
+                    </div>
+                    <div class="col-md-4 fv-row">
+                        <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Perfil</label>
+                        <select class="form-control form-control-solid" id="perfil_id" name="perfil_id">
+                            <option value="3" selected>Trabajador</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row g-9 mb-8">
+                    <div class="col-md-6 fv-row">
+                        <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Celular</label>
+                        <input type="number" class="form-control form-control-solid"  placeholder="" id="celular" name="celular"/>
+                    </div>
+                </div>
+                <div class="row g-9 mb-8">
+                    <div class="col-md-6 fv-row">
+                        <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Correo</label>
+                        <input type="text" class="form-control form-control-solid"  placeholder="" id="correo" name="correo"/>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="button" onclick="limpiarForm('formUsuario');mostrar_ocultar('divTablaUsuarios','divFormUsuario')" class="btn btn-light me-3">Cancelar</button>
+                    <button id="btn_guardar" class="btn btn-primary">Guardar</button>
+                </div>
+                <!--end::Actions-->
+            </form>
+        </div>
+        <!--end::Card body-->
+    </div>
+    <!--end::Col-->
+</div>

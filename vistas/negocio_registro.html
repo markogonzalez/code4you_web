@@ -1,0 +1,104 @@
+
+<div class="row g-5 g-xl-8">
+    <h2 class="card-title align-items-start flex-column">
+        <span class="card-label fw-bold text-gray-800">Registrar número de WhatsApp</span>
+    </h2>
+    <div class="card card-flush h-xl-100" >
+        <div class="card-body p-9">
+            <div id="div_registro" class="d-flex flex-column flex-center text-justify mb-10 fs-5 fw-semibold text-gray-800">
+                <form id="formNegocio" name="formNegocio" action="" >
+                    <input type="hidden" name="id_servicio" id="id_servicio" value="1"/>
+                    
+                    <p class="mb-8">Estás a punto de vincular un número de teléfono a nuestro sistema automatizado de WhatsApp Business. Este número será el canal oficial de atención para tu negocio.</p>
+                    <h2 class="fw-bold text-gray-900 mb-8">Requisitos antes de continuar:</h2>
+                    <ul class="fs-4 fw-semibold mb-6">
+                        <li>
+                            <span>El número <strong>debe estar disponible</strong> y <strong>no debe estar registrado actualmente en WhatsApp</strong> (ni personal ni Business).</span>
+                        </li>
+                        <li class="my-2">
+                            <span>Debes tener acceso para recibir un <strong>SMS o llamada</strong> de verificación en ese número.</span>
+                        </li>
+                    </ul>
+                    <div class="notice d-flex bg-light-warning rounded border-warning border border-dashed p-6 mb-8">
+                        <i class="ki-solid ki-information fs-2tx text-warning me-4">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                            <span class="path3"></span>
+                        </i>
+                        <div class="d-flex flex-stack flex-grow-1">
+                            <div class="fw-semibold">
+                                <h4 class="text-gray-900 fw-bold">Importante</h4>
+                                <div class="fs-6 text-gray-700">Una vez registrado, ese número <strong>no podrá usarse en otro dispositivo con WhatsApp</strong>. Se convertirá en una cuenta oficial de empresa gestionada por <strong>Code4You</strong>.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-8">
+                        <div class="col-xl-3">
+                            <div class="fs-6 fw-semibold mt-2 mb-3">Nombre del negocio</div>
+                        </div>
+                        <div class="col-xl-9 fv-row">
+                            <input type="text" class="form-control form-control-solid" name="nombre_negocio" id="nombre_negocio" placeholder="Ingrese el nombre del negocio"  />
+                        </div>
+                    </div>
+
+                    <div class="row mb-8">
+                        <div class="col-xl-3">
+                            <div class="fs-6 fw-semibold mt-2 mb-3">Número WhatsApp</div>
+                        </div>
+                        <div class="col-xl-9 fv-row">
+                            <input type="text" class="form-control form-control-solid" name="numero_negocio" id="numero_negocio" placeholder="Ingrese el número de WhatsApp"  />
+                        </div>
+                    </div>
+
+                    <div class="row mb-8">
+                        <div class="col-xl-3">
+                            <div class="fs-6 fw-semibold mt-2 mb-3">Metodo de verificación</div>
+                        </div>
+                        <div class="col-xl-9">
+                            <div class="d-flex fw-semibold h-100">
+                                <div class="form-check form-check-custom form-check-solid me-9">
+                                    <input class="form-check-input" type="radio" value="SMS" name="verificacion" />
+                                    <label class="form-check-label ms-3" for="email">SMS</label>
+                                </div>
+                                <div class="form-check form-check-custom form-check-solid">
+                                    <input class="form-check-input" type="radio" value="VOICE" name="verificacion" />
+                                    <label class="form-check-label ms-3" for="phone">Llamada</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button id="btn_guardar" class="btn btn-primary">Registrar</button>
+                    </div>
+                </form>
+            </div>
+            <div id="div_verificacion" class="d-flex flex-column flex-center text-justify mb-10 fs-5 fw-semibold text-gray-800 d-none">
+                <form class="form w-100 mb-13" name="formVerificacion" id="formVerificacion">
+                    <input type="hidden" id="id_whats" name="id_whats" value="">
+                    <div class="text-center mb-10">
+                        <img alt="Logo" class="mh-125px" src="assets/media/svg/misc/smartphone-2.svg" />
+                    </div>
+                    <div class="text-center mb-10">
+                        <div class="text-muted fw-semibold fs-5 mb-5">Ingresa el código que fue enviado al número registrado.</div>
+                    </div>
+                    <div class="mb-10">
+                        <div class="fw-bold text-start text-gray-900 fs-6 mb-1 ms-1">Escribe los 6 digitos</div>
+
+                        <div class="d-flex flex-wrap flex-stack">
+                            <input type="number" name="codigo_verificacion" id="codigo_verificacion" class="form-control form-control-solid">
+                        </div>
+                        <!--begin::Input group-->
+                    </div>
+                    <div class="d-flex flex-stack">
+                        <div class="d-flex">
+                            <button class="btn btn-primary" id="btn_reenviar" disabled><span class='contador'></span></button>
+                        </div>
+                        <button id="btn_verificar" class="btn btn-primary">Validar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
