@@ -14,14 +14,13 @@
                             <label class="col-lg-4 col-form-label fw-semibold fs-6">Foto de perfil</label>
                             <div class="col-lg-8">
                                 <div class="image-input image-input-outline" >
-                                    <div class="image-input-wrapper w-125px h-125px" id="" style="background-image:  url('assets/media/svg/avatars/blank.svg')"></div>
+                                    <div class="image-input-wrapper w-125px h-125px" id="div_foto" style="background-image:  url('assets/media/svg/avatars/blank.svg')"></div>
                                     <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" onclick="seleccionarFotoPerfil()" data-bs-toggle="tooltip" title="Cambiar foto de perfil">
                                         <i class="ki-duotone ki-pencil fs-7">
                                             <span class="path1"></span>
                                             <span class="path2"></span>
                                         </i>
-                                        <input type="file" name="avatar" accept=".png, .jpg, .jpeg" />
-                                        <input type="hidden" name="avatar_remove" />
+                                        <input type="text" id="foto" name="avatar" />
                                     </label>
                                 </div>
                             </div>
