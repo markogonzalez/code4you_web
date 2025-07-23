@@ -127,7 +127,6 @@ class whats extends utilidades {
             
     }
 
-
     public function enviarCodigoVerificacion($params = null) {
         
         $mensaje = "";
@@ -280,6 +279,82 @@ class whats extends utilidades {
         return [$codigoApi,$response];
     }
 
+    public function actualizarPerfilWhatsApp($params = null) {
+        $codigo = "OK";
+        $data = [];
+
+        // Sanitización de parámetros
+        $id_servicio = isset($params["id_servicio"]) ? $this->cleanQuery($params["id_servicio"]) : 0;
+        $id_negocio = isset($params["id_negocio"]) ? $this->cleanQuery($params["id_negocio"]) : 0;
+        $id_whats = isset($params["id_whats"]) ? $this->cleanQuery($params["id_whats"]) : "";
+        $foto_perfil = isset($params["foto_perfil"]) ? $this->cleanQuery($params["foto_perfil"]) : "";
+        $nombre = isset($params["nombre"]) ? $this->cleanQuery($params["nombre"]) : "";
+        $about = isset($params["about"]) ? $this->cleanQuery($params["about"]) : "";
+        $address = isset($params["address"]) ? $this->cleanQuery($params["address"]) : "";
+        $description = isset($params["description"]) ? $this->cleanQuery($params["description"]) : "";
+        $email = isset($params["email"]) ? $this->cleanQuery($params["email"]) : "";
+        $website = isset($params["website"]) ? $this->cleanQuery($params["website"]) : "";
+        $fotoBase64 =  isset($params["foto"]) ? $this->cleanQuery($params["foto"]) : "";
+        if($fotoBase64!=""){
+            $fotoData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $fotoBase64));
+            // Validar y crear nombre único
+            $nombreArchivo = 'perfil_'.$this->sesion['id_usuario'].'_'.time().'.jpg';
+            $ruta = __DIR__ . '/uploads/perfiles/' . $nombreArchivo;
+    
+            // Guardar imagen
+            if (file_put_contents($ruta, $fotoData)) {
+                list($codigo,$response) = $this->whats->enviarRespuesta([
+                    "id_whats" => WHATS_PHONE_ID,
+                    "destinatario" => DESTINATARIO_CODE4YOU,
+                    "tipo" => "template",
+                    "template" => "app_caambio_imagen",
+                    "variables" => [$nombre,$nombreArchivo],
+                ]);
+               if($codigo!="OK"){
+                $codigo = "ERR";
+                return [$codigo, ["mensaje_error" => "Error al subir foto de perfil"]];
+               }
+            } else {
+                $codigo = "ERR";
+                return [$codigo, ["mensaje_error" => "Error al subir foto de perfil"]];
+            }
+        }
+
+        $url = "https://graph.facebook.com/" . WHATS_VERSION . "/" . $id_whats . "/whatsapp_business_profile";
+
+        list($codigoApi, $response) = $this->request('POST', $url, [
+            "about" => $about,
+            "description" => $description,
+            "address" => $address,
+            "email" => $email,
+            "website" => [$website],
+        ]);
+
+        if ($codigoApi !== "OK") {
+            return ["ERR", $response];
+        }
+
+        $qry_update = "
+            UPDATE cliente_negocio SET
+            about = '".$about."',
+            description = '".$description."',
+            address = '".$address."',
+            address = '".$address."',
+            email = '".$email."',
+            website = '".$website."',
+            foto_perfil = '".$foto_perfil."'
+            WHERE id_negocio = ".$id_negocio."
+        ";
+
+        $this->query($qry_update);
+
+        $data = [
+            "mensaje" => "Perfil actualizado correctamente.",
+            "meta_response" => $response
+        ];
+
+        return [$codigo, $data];
+    }
 
 
 

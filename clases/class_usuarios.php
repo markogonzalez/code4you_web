@@ -174,7 +174,7 @@
         }
 
         public function getUsuarios($params=null){
-            error_log(print_r($this->permisos,true));
+
             $codigo = "OK";
             $mensaje = "";
             $elementos = [];

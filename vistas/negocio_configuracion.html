@@ -7,128 +7,89 @@
         <div class="card-body p-9">
             <div id="div_registro" class="d-flex flex-column flex-center text-justify mb-10 fs-5 fw-semibold text-gray-800">
                 <form id="formNegocio" name="formNegocio" action="" >
-                    <input type="hidden" name="id_servicio" id="id_servicio" value="1"/>
+                    <input type="hidden" name="id_servicio" id="id_servicio" value=""/>
+                    <input type="hidden" name="id_negocio" id="id_negocio" value=""/>
+                    <input type="hidden" name="id_whats" id="id_whats" value=""/>
+                    <input type="hidden" name="foto_perfil" id="foto_perfil" value=""/>
                     
                     <!--begin::Input group-->
-                        <div class="row mb-6">
-                            <label class="col-lg-4 col-form-label fw-semibold fs-6">Foto de perfil</label>
-                            <div class="col-lg-8">
-                                <div class="image-input image-input-outline" >
-                                    <div class="image-input-wrapper w-125px h-125px" id="div_foto" style="background-image:  url('assets/media/svg/avatars/blank.svg')"></div>
-                                    <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" id="btnSeleccionarFoto" data-bs-toggle="tooltip" title="Cambiar foto de perfil">
-                                        <i class="ki-duotone ki-pencil fs-7">
-                                            <span class="path1"></span>
-                                            <span class="path2"></span>
-                                        </i>
-                                        <input type="text" id="foto" name="avatar" />
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mb-6">
-                            <label class="col-lg-4 col-form-label required fw-semibold fs-6">Full Name</label>
-                            <div class="col-lg-8">
-                                <div class="row">
-                                    <div class="col-lg-6 fv-row">
-                                        <input type="text" name="fname" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="First name" value="Max" />
-                                    </div>
-                                    <div class="col-lg-6 fv-row">
-                                        <input type="text" name="lname" class="form-control form-control-lg form-control-solid" placeholder="Last name" value="Smith" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mb-6">
-                            <label class="col-lg-4 col-form-label required fw-semibold fs-6">Company</label>
-                            <div class="col-lg-8 fv-row">
-                                <input type="text" name="company" class="form-control form-control-lg form-control-solid" placeholder="Company name" value="Keenthemes" />
-                            </div>
-                        </div>
-                        <div class="row mb-6">
-                            <label class="col-lg-4 col-form-label fw-semibold fs-6">
-                                <span class="required">Contact Phone</span>
-                                <span class="ms-1" data-bs-toggle="tooltip" title="Phone number must be active">
-                                    <i class="ki-duotone ki-information-5 text-gray-500 fs-6">
+                    <div class="row mb-6">
+                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Foto de perfil</label>
+                        <div class="col-lg-8">
+                            <div class="image-input image-input-outline" >
+                                <div class="image-input-wrapper w-125px h-125px" id="div_foto" style="background-image:  url('assets/media/svg/avatars/blank.svg')"></div>
+                                <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" id="btnSeleccionarFoto" data-bs-toggle="tooltip" title="Cambiar foto de perfil">
+                                    <i class="ki-duotone ki-pencil fs-7">
                                         <span class="path1"></span>
                                         <span class="path2"></span>
-                                        <span class="path3"></span>
                                     </i>
-                                </span>
-                            </label>
-                            <div class="col-lg-8 fv-row">
-                                <input type="tel" name="phone" class="form-control form-control-lg form-control-solid" placeholder="Phone number" value="044 3276 454 935" />
+                                </label>
                             </div>
                         </div>
-                        <!--end::Input group-->
-                        <!--begin::Input group-->
-                       
-                        <div class="row mb-6">
-                            <!--begin::Label-->
-                            <label class="col-lg-4 col-form-label required fw-semibold fs-6">Communication</label>
-                            <!--end::Label-->
-                            <!--begin::Col-->
-                            <div class="col-lg-8 fv-row">
-                                <!--begin::Options-->
-                                <div class="d-flex align-items-center mt-3">
-                                    <!--begin::Option-->
-                                    <label class="form-check form-check-custom form-check-inline form-check-solid me-5">
-                                        <input class="form-check-input" name="communication[]" type="checkbox" value="1" />
-                                        <span class="fw-semibold ps-2 fs-6">Email</span>
-                                    </label>
-                                    <!--end::Option-->
-                                    <!--begin::Option-->
-                                    <label class="form-check form-check-custom form-check-inline form-check-solid">
-                                        <input class="form-check-input" name="communication[]" type="checkbox" value="2" />
-                                        <span class="fw-semibold ps-2 fs-6">Phone</span>
-                                    </label>
-                                    <!--end::Option-->
-                                </div>
-                                <!--end::Options-->
-                            </div>
-                            <!--end::Col-->
-                        </div>
-                        <!--end::Input group-->
-                        <!--begin::Input group-->
-                        <div class="row mb-0">
-                            <!--begin::Label-->
-                            <label class="col-lg-4 col-form-label fw-semibold fs-6">Allow Marketing</label>
-                            <!--begin::Label-->
-                            <!--begin::Label-->
-                            <div class="col-lg-8 d-flex align-items-center">
-                                <div class="form-check form-check-solid form-switch form-check-custom fv-row">
-                                    <input class="form-check-input w-45px h-30px" type="checkbox" id="allowmarketing" checked="checked" />
-                                    <label class="form-check-label" for="allowmarketing"></label>
+                    </div>
+                    <div class="row mb-2">
+                        <label class="col-lg-4 col-form-label required fw-semibold fs-6">Nombre del negocio</label>
+                        <div class="col-lg-8">
+                            <div class="row">
+                                <div class="col-lg-6 fv-row">
+                                    <input type="text" id="nombre" name="nombre" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" disabled />
                                 </div>
                             </div>
-                            <!--begin::Label-->
                         </div>
-                    <div class="text-center">
-                        <button id="btn_guardar" class="btn btn-primary">Registrar</button>
                     </div>
-                </form>
-            </div>
-            <div id="div_verificacion" class="d-flex flex-column flex-center text-justify mb-10 fs-5 fw-semibold text-gray-800 d-none">
-                <form class="form w-100 mb-13" name="formVerificacion" id="formVerificacion">
-                    <input type="hidden" id="id_whats" name="id_whats" value="">
-                    <div class="text-center mb-10">
-                        <img alt="Logo" class="mh-125px" src="assets/media/svg/misc/smartphone-2.svg" />
+                    <div class="row mb-2">
+                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Acerca de</label>
+                        <div class="col-lg-8">
+                            <div class="row">
+                                <div class="col-lg-6 fv-row">
+                                    <textarea name="about" id="about" rows="3" class="form-control form-control-solid mb-lg-0" maxlength="139"></textarea>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="text-center mb-10">
-                        <div class="text-muted fw-semibold fs-5 mb-5">Ingresa el código que fue enviado al número registrado.</div>
+                    <div class="row mb-2">
+                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Dirección</label>
+                        <div class="col-lg-8">
+                            <div class="row">
+                                <div class="col-lg-6 fv-row">
+                                    <input type="text" name="address" id="address" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="Dirección del negocio" value="" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-10">
-                        <div class="fw-bold text-start text-gray-900 fs-6 mb-1 ms-1">Escribe los 6 digitos</div>
+                    <div class="row mb-2">
+                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Descripción</label>
+                        <div class="col-lg-8">
+                            <div class="row">
+                                <div class="col-lg-6 fv-row">
+                                    <textarea name="description" id="description" rows="3" class="form-control form-control-solid mb-lg-0" maxlength="512"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Correo</label>
+                        <div class="col-lg-8">
+                            <div class="row">
+                                <div class="col-lg-6 fv-row">
+                                    <input type="email" name="email" id="email" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="contacto@tunegocio.com" value="" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Pagina Web</label>
+                        <div class="col-lg-8">
+                            <div class="row">
+                                <div class="col-lg-6 fv-row">
+                                    <input type="text" name="website" id="website" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="https://www.tunegocio.com" value="" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                        <div class="d-flex flex-wrap flex-stack">
-                            <input type="number" name="codigo_verificacion" id="codigo_verificacion" class="form-control form-control-solid">
-                        </div>
-                        <!--begin::Input group-->
-                    </div>
-                    <div class="d-flex flex-stack">
-                        <div class="d-flex">
-                            <button class="btn btn-primary" id="btn_reenviar" disabled><span class='contador'></span></button>
-                        </div>
-                        <button id="btn_verificar" class="btn btn-primary">Validar</button>
+                    <div class="text-center">
+                        <button id="btn_guardar" class="btn btn-primary">Actualizar</button>
                     </div>
                 </form>
             </div>
