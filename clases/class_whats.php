@@ -312,7 +312,7 @@ class whats extends utilidades {
                 }
             }
         
-            // Ruta completa del archivo
+            // Ruta completa del archivo 
             $ruta = $directorio . $nombreArchivo;
         
             // Guardar la imagen
