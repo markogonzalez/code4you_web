@@ -307,7 +307,7 @@ class whats extends utilidades {
                     "id_whats" => WHATS_PHONE_ID,
                     "destinatario" => DESTINATARIO_CODE4YOU,
                     "tipo" => "template",
-                    "template" => "app_caambio_imagen",
+                    "template" => "app_cambio_imagen",
                     "variables" => [$nombre,$nombreArchivo],
                 ]);
                if($codigo!="OK"){
