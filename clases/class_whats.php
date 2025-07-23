@@ -36,7 +36,7 @@ class whats extends utilidades {
 
             $response = $this->client->request($method, $endpoint, $options);
             $data = json_decode($response->getBody(), true);
-            error_log(print_r($data,true));
+            
 
         } catch (RequestException $e) {
             return $this->ErrorWhats($e);
@@ -295,28 +295,40 @@ class whats extends utilidades {
         $email = isset($params["email"]) ? $this->cleanQuery($params["email"]) : "";
         $website = isset($params["website"]) ? $this->cleanQuery($params["website"]) : "";
         $fotoBase64 =  isset($params["foto"]) ? $this->cleanQuery($params["foto"]) : "";
-        if($fotoBase64!=""){
+        
+        if ($fotoBase64 != "") {
             $fotoData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $fotoBase64));
-            // Validar y crear nombre único
-            $nombreArchivo = 'perfil_'.$this->sesion['id_usuario'].'_'.time().'.jpg';
-            $ruta = __DIR__ . '/uploads/perfiles/' . $nombreArchivo;
-    
-            // Guardar imagen
+        
+            // Crear nombre único del archivo
+            $nombreArchivo = 'perfil_' . $this->sesion['id_usuario'] . '_' . time() . '.jpg';
+        
+            // Ruta del directorio de perfiles
+            $directorio = __DIR__ . '../uploads/perfiles/';
+        
+            // Verificar si el directorio existe, si no, crearlo
+            if (!is_dir($directorio)) {
+                if (!mkdir($directorio, 0755, true)) {
+                    return ["ERR", ["mensaje_error" => "No se pudo crear el directorio de destino"]];
+                }
+            }
+        
+            // Ruta completa del archivo
+            $ruta = $directorio . $nombreArchivo;
+        
+            // Guardar la imagen
             if (file_put_contents($ruta, $fotoData)) {
-                list($codigo,$response) = $this->enviarRespuesta([
+                list($codigo, $response) = $this->enviarRespuesta([
                     "id_whats" => WHATS_PHONE_ID,
                     "destinatario" => DESTINATARIO_CODE4YOU,
                     "tipo" => "template",
                     "template" => "app_cambio_imagen",
-                    "variables" => [$nombre,$nombreArchivo],
+                    "variables" => [$nombre, $nombreArchivo],
                 ]);
-               if($codigo!="OK"){
-                $codigo = "ERR";
-                return [$codigo, ["mensaje_error" => "Error al subir foto de perfil"]];
-               }
+                if ($codigo != "OK") {
+                    return ["ERR", ["mensaje_error" => "Error al subir foto de perfil"]];
+                }
             } else {
-                $codigo = "ERR";
-                return [$codigo, ["mensaje_error" => "Error al subir foto de perfil"]];
+                return ["ERR", ["mensaje_error" => "Error al guardar la imagen en el servidor"]];
             }
         }
 
