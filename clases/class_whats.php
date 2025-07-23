@@ -303,7 +303,7 @@ class whats extends utilidades {
     
             // Guardar imagen
             if (file_put_contents($ruta, $fotoData)) {
-                list($codigo,$response) = $this->whats->enviarRespuesta([
+                list($codigo,$response) = $this->enviarRespuesta([
                     "id_whats" => WHATS_PHONE_ID,
                     "destinatario" => DESTINATARIO_CODE4YOU,
                     "tipo" => "template",
