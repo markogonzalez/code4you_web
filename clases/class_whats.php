@@ -327,6 +327,7 @@ class whats extends utilidades {
                 if ($codigo != "OK") {
                     return ["ERR", ["mensaje_error" => "Error al subir foto de perfil"]];
                 }
+                $foto_perfil = $nombreArchivo;
             } else {
                 return ["ERR", ["mensaje_error" => "Error al guardar la imagen en el servidor"]];
             }
@@ -335,6 +336,7 @@ class whats extends utilidades {
         $url = "https://graph.facebook.com/" . WHATS_VERSION . "/" . $id_whats . "/whatsapp_business_profile";
 
         list($codigoApi, $response) = $this->request('POST', $url, [
+            "messaging_product" => "whatsapp",
             "about" => $about,
             "description" => $description,
             "address" => $address,
@@ -350,7 +352,6 @@ class whats extends utilidades {
             UPDATE cliente_negocio SET
             about = '".$about."',
             description = '".$description."',
-            address = '".$address."',
             address = '".$address."',
             email = '".$email."',
             website = '".$website."',
