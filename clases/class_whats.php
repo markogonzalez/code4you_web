@@ -303,7 +303,7 @@ class whats extends utilidades {
             $nombreArchivo = 'perfil_' . $this->sesion['id_usuario'] . '_' . time() . '.jpg';
         
             // Ruta del directorio de perfiles
-            $directorio = __DIR__ . '../uploads/perfiles/';
+            $directorio = __DIR__ . '/../uploads/perfiles/';
         
             // Verificar si el directorio existe, si no, crearlo
             if (!is_dir($directorio)) {
