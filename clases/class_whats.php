@@ -279,7 +279,7 @@ class whats extends utilidades {
         return [$codigoApi,$response];
     }
 
-    public function actualizarPerfilWhatsApp($params = null) {
+    public function actualizarPerfil($params = null) {
         $codigo = "OK";
         $data = [];
 
