@@ -41,7 +41,7 @@
             $id_usuario = $this->cleanQuery($params["id_usuario"] ?? 0);
             $id_servicio = $this->cleanQuery($params["id_servicio"] ?? 0);
 
-            $qry = "SELECT *,n.id_negocio as id_negocio_cliente,s.total_servicios,h.activo as horario_activo FROM cliente_negocio n 
+            $qry = "SELECT *,n.id_negocio as id_negocio_cliente,s.total_servicios,h.activo as horario_activo,n.id_servicio as id_servicio_negocio FROM cliente_negocio n 
                     LEFT JOIN negocio_horarios h ON n.id_negocio = h.id_negocio 
                     LEFT JOIN (SELECT COUNT(*) as total_servicios,id_negocio FROM negocio_servicios ) as s ON n.id_negocio = s.id_negocio
                     WHERE n.id_usuario = $id_usuario AND n.id_servicio = $id_servicio AND n.activo = 1";
@@ -68,6 +68,7 @@
                         "id_negocio" => $row['id_negocio_cliente'],
                         "id_whats" => $row['id_whats'],
                         "total_servicios" => $row['total_servicios'],
+                        "id_servicio" => $row['id_servicio_negocio']
                     ];
                     if ($row['dia'] != null) {
                         $horarios[$row['dia']] = [
