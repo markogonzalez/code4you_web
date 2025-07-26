@@ -1,7 +1,7 @@
 
 <div class="row g-5 g-xl-8">
     <h2 class="card-title align-items-start flex-column">
-        <span class="card-label fw-bold text-gray-800">Trabajadores Nego</span>
+        <span class="card-label fw-bold text-gray-800">Trabajadores Negocio</span>
     </h2>
     <!--begin::Col-->
     <div class="card card-flush h-xl-100" id="divTablaUsuarios">
@@ -35,7 +35,7 @@
         <!--end::Card body-->
     </div>
     <!-- Pantalla de formulario nuevo usuario o editar -->
-        <div class="card card-flush h-xl-100" id="divFormUsuario" style="display: none;">
+    <div class="card card-flush h-xl-100" id="divFormUsuario" style="display: none;">
         <div class="card-header border-0 pt-6">
             <div class="card-title flex-column">
                 <h2 class="mb-3" id="title_modal">Nuevo trabajador</h2>
@@ -78,6 +78,258 @@
                 <div class="text-center">
                     <button type="button" onclick="limpiarForm('formUsuario');mostrar_ocultar('divTablaUsuarios','divFormUsuario')" class="btn btn-light me-3">Cancelar</button>
                     <button id="btn_guardar" class="btn btn-primary">Guardar</button>
+                </div>
+                <!--end::Actions-->
+            </form>
+        </div>
+        <!--end::Card body-->
+    </div>
+    <!-- Pantalla de horarios -->
+    <div class="card card-flush h-xl-100" id="divFormHorarios" style="display: none;">
+        <div class="card-header border-0 pt-6">
+            <div class="card-title flex-column">
+                <h2 class="mb-3" id="title_modal">Horarios del trabajador</h2>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <form id="formHorarios" class="form" action="" method="POST">
+                <div class="py-2">
+                    <!--begin::Item-->
+                    <div class="d-flex flex-column">
+                        <div class="d-flex flex-stack">
+                            <div class="d-flex">
+                                Lunes
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <div class="form-check form-check-solid form-check-custom form-switch">
+                                    <input class="form-check-input w-45px h-30px" type="checkbox" name="dias[lunes][activo]" data-dia="lunes" id="lunes">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-8" id="div_lunes" style="display: none;">
+                            <div class="col-6">
+                                <div class="col-xl-12">
+                                    <div class="fs-6 fw-semibold mt-2 mb-3">Inicia</div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <input type="time" name="dias[lunes][inicio]" id="lunes_inicio" class="form-control form-control-solid" value="09:00">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="col-xl-12">
+                                    <div class="fs-6 fw-semibold mt-2 mb-3">Termina</div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <input type="time" name="dias[lunes][fin]" id="lunes_fin" class="form-control form-control-solid" value="18:00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--end::Item-->
+                    <div class="separator separator-dashed my-5"></div>
+                    <!--begin::Item-->
+                    <div class="d-flex flex-column">
+                        <div class="d-flex flex-stack">
+                            <div class="d-flex">
+                                Martes
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <div class="form-check form-check-solid form-check-custom form-switch">
+                                    <input class="form-check-input w-45px h-30px" type="checkbox" name="dias[martes][activo]" data-dia="martes" id="martes">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-8" id="div_martes" style="display: none;">
+                            <div class="col-6">
+                                <div class="col-xl-12">
+                                    <div class="fs-6 fw-semibold mt-2 mb-3">Inicia</div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <input type="time" name="dias[martes][inicio]" id="martes_inicio" class="form-control form-control-solid" value="09:00">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="col-xl-12">
+                                    <div class="fs-6 fw-semibold mt-2 mb-3">Termina</div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <input type="time" name="dias[martes][fin]" id="martes_fin" class="form-control form-control-solid" value="18:00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--end::Item-->
+                    <div class="separator separator-dashed my-5"></div>
+                    <!--begin::Item-->
+                    <div class="d-flex flex-column">
+                        <div class="d-flex flex-stack">
+                            <div class="d-flex">
+                                Miércoles
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <div class="form-check form-check-solid form-check-custom form-switch">
+                                    <input class="form-check-input w-45px h-30px" type="checkbox" name="dias[miercoles][activo]" data-dia="miercoles" id="miercoles">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-8" id="div_miercoles" style="display: none;">
+                            <div class="col-6">
+                                <div class="col-xl-12">
+                                    <div class="fs-6 fw-semibold mt-2 mb-3">Inicia</div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <input type="time" name="dias[miercoles][inicio]" id="miercoles_inicio" class="form-control form-control-solid" value="09:00">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="col-xl-12">
+                                    <div class="fs-6 fw-semibold mt-2 mb-3">Termina</div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <input type="time" name="dias[miercoles][fin]" id="miercoles_fin" class="form-control form-control-solid" value="18:00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--end::Item-->
+                    <div class="separator separator-dashed my-5"></div>
+                    <!--begin::Item-->
+                    <div class="d-flex flex-column">
+                        <div class="d-flex flex-stack">
+                            <div class="d-flex">
+                                Jueves
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <div class="form-check form-check-solid form-check-custom form-switch">
+                                    <input class="form-check-input w-45px h-30px" type="checkbox" name="dias[jueves][activo]" data-dia="jueves" id="jueves">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-8" id="div_jueves" style="display: none;">
+                            <div class="col-6">
+                                <div class="col-xl-12">
+                                    <div class="fs-6 fw-semibold mt-2 mb-3">Inicia</div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <input type="time" name="dias[jueves][inicio]" id="jueves_inicio" class="form-control form-control-solid" value="09:00">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="col-xl-12">
+                                    <div class="fs-6 fw-semibold mt-2 mb-3">Termina</div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <input type="time" name="dias[jueves][fin]" id="jueves_fin" class="form-control form-control-solid" value="18:00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--end::Item-->
+                    <div class="separator separator-dashed my-5"></div>
+                    <!--begin::Item-->
+                    <div class="d-flex flex-column">
+                        <div class="d-flex flex-stack">
+                            <div class="d-flex">
+                                Viernes
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <div class="form-check form-check-solid form-check-custom form-switch">
+                                    <input class="form-check-input w-45px h-30px" type="checkbox" name="dias[viernes][activo]" data-dia="viernes" id="viernes">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-8" id="div_viernes" style="display: none;">
+                            <div class="col-6">
+                                <div class="col-xl-12">
+                                    <div class="fs-6 fw-semibold mt-2 mb-3">Inicia</div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <input type="time" name="dias[viernes][inicio]" id="viernes_inicio" class="form-control form-control-solid" value="09:00">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="col-xl-12">
+                                    <div class="fs-6 fw-semibold mt-2 mb-3">Termina</div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <input type="time" name="dias[viernes][fin]" id="viernes_fin" class="form-control form-control-solid" value="18:00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--end::Item-->
+                    <div class="separator separator-dashed my-5"></div>
+                    <!--begin::Item-->
+                    <div class="d-flex flex-column">
+                        <div class="d-flex flex-stack">
+                            <div class="d-flex">
+                                Sábado
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <div class="form-check form-check-solid form-check-custom form-switch">
+                                    <input class="form-check-input w-45px h-30px" type="checkbox" name="dias[sabado][activo]" data-dia="sabado" id="sabado">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-8" id="div_sabado" style="display: none;">
+                            <div class="col-6">
+                                <div class="col-xl-12">
+                                    <div class="fs-6 fw-semibold mt-2 mb-3">Inicia</div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <input type="time" name="dias[sabado][inicio]" id="sabado_inicio" class="form-control form-control-solid" value="09:00">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="col-xl-12">
+                                    <div class="fs-6 fw-semibold mt-2 mb-3">Termina</div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <input type="time" name="dias[sabado][fin]" id="sabado_fin" class="form-control form-control-solid" value="18:00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--end::Item-->
+                    <div class="separator separator-dashed my-5"></div>
+                    <!--begin::Item-->
+                    <div class="d-flex flex-column">
+                        <div class="d-flex flex-stack">
+                            <div class="d-flex">
+                                Domingo
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <div class="form-check form-check-solid form-check-custom form-switch">
+                                    <input class="form-check-input w-45px h-30px" type="checkbox" name="dias[domingo][activo]" data-dia="domingo" id="domingo">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-8" id="div_domingo" style="display: none;">
+                            <div class="col-6">
+                                <div class="col-xl-12">
+                                    <div class="fs-6 fw-semibold mt-2 mb-3">Inicia</div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <input type="time" name="dias[domingo][inicio]" id="domingo_inicio" class="form-control form-control-solid" value="09:00">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="col-xl-12">
+                                    <div class="fs-6 fw-semibold mt-2 mb-3">Termina</div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <input type="time" name="dias[domingo][fin]" id="domingo_fin" class="form-control form-control-solid" value="18:00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--end::Item-->
+                    <div class="separator separator-dashed my-5"></div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="button" onclick="limpiarForm('formHorarios');mostrar_ocultar('divTablaUsuarios','divFormHorarios')" class="btn btn-light me-3">Cancelar</button>
+                    <button id="btn_guardar_horario" class="btn btn-primary">Guardar</button>
                 </div>
                 <!--end::Actions-->
             </form>

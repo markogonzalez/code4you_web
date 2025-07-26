@@ -22,7 +22,7 @@
                 ]);
                 $this->permisos = $permisosArr;
             }
-            error_log($this->id_modulo);
+
             @$this->whats = new whats();
 
         } //function __construct
@@ -67,6 +67,7 @@
             $res_repeat = $this->query($user_repeat);
 
             $nombre_completo = $nombre." ".$apellidos;
+            $id_insert=0;
             
             if($id_usuario==0){
 
@@ -111,6 +112,27 @@
                         if($this->query($qry_insert)){
                             list($codigo,$negocio) = $this->getNegocioUsuario(["id_usuario"=>$this->sesion['id_usuario'],"id_servicio"=>$id_servicio]);
                             if($codigo=="OK"){
+                                foreach ($negocio['horarios'] as $horario) {
+                                    $qry_insert_horario = "INSERT INTO trabajador_horarios (
+                                        id_usuario, 
+                                        dia,
+                                        activo,
+                                        hora_inicio,
+                                        hora_fin,
+                                        personalizado
+                                        )VALUES (
+                                            $id_insert, 
+                                            '".$horario['dia']."', 
+                                            '".$horario['activo']."', 
+                                            '".$horario['inicio']."', 
+                                            '".$horario['fin']."', 
+                                            0)";
+                                    $res = $this->query($qry_insert_horario);
+                                    if(!$res){
+                                        return["ERR","Error al insertar horario del trabajador"];
+                                    }
+                                }
+
                                 list($codigoBienvenida,$response) = $this->whats->enviarRespuesta([
                                     "id_whats" => $negocio['id_whats'],
                                     "destinatario" => $celular,
@@ -169,7 +191,7 @@
                 error_log("Error al insertar usuario, intenta de nuevo - ".$e);
             }
 
-            return array(0 => $codigo, 1 => array("mensaje"=>$mensaje));
+            return array(0 => $codigo, 1 => array("mensaje"=>$mensaje,"id_insert"=>$id_insert));
 
         }
 
@@ -220,15 +242,17 @@
 
                         $boton_editar = "";
                         $boton_elimar = "";
+                        $boton_horarios = "";
 
                         if($this->permisos['permisos'][$this->id_modulo]['u']){
-                            $boton_editar = '<button data-id_usuario="'.$usuarios["id_usuario"].'" class="btn btn-icon btn-primary btn-sm btn-editar"><i class="ki-duotone ki-notepad-edit fs-1"><span class="path1"></span><span class="path2"></span></i></button>';
+                            $boton_editar = '<button data-id_usuario="'.$usuarios["id_usuario"].'" class="btn btn-icon btn-primary btn-sm btn-editar"><i class="ki-solid ki-notepad-edit fs-1"></i></button>';
+                            $boton_horarios = '<button data-id_usuario="'.$usuarios["id_usuario"].'" class="btn btn-icon btn-primary btn-sm btn-horarios"><i class="ki-solid ki-time fs-1"></i></button>';
                         }
                         if($this->permisos['permisos'][$this->id_modulo]['d']){
-                            $boton_elimar = '<button data-id_usuario="'.$usuarios["id_usuario"].'" class="btn btn-icon btn-primary btn-sm btn-eliminar"><i class="ki-duotone ki-trash fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i></button>';
+                            $boton_elimar = '<button data-id_usuario="'.$usuarios["id_usuario"].'" class="btn btn-icon btn-primary btn-sm btn-eliminar"><i class="ki-solid ki-trash fs-1"></i></button>';
                         }
     
-                        $usuarios['acciones'] = $boton_editar." ".$boton_elimar;
+                        $usuarios['acciones'] = $boton_editar." ".$boton_horarios." ".$boton_elimar;
                         $elementos[] = $usuarios;
                     }
 
@@ -288,6 +312,10 @@
             ]);
             // error_log(print_r($negocio,true));
             return $negocio;
+        }
+
+        public function guardarHorarioTrabajador($params = null){
+
         }
         
 

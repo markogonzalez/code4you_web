@@ -1,98 +1,568 @@
 
 <div class="row g-5 g-xl-8">
     <h2 class="card-title align-items-start flex-column">
-        <span class="card-label fw-bold text-gray-800">Negocio</span>
+        <span class="card-label fw-bold text-gray-800" id="span_titulo"></span>
     </h2>
     <div class="card card-flush h-xl-100" >
         <div class="card-body p-9">
-            <div id="div_registro" class="d-flex flex-column flex-center text-justify mb-10 fs-5 fw-semibold text-gray-800">
-                <form id="formNegocio" name="formNegocio" action="" >
-                    <input type="hidden" name="id_servicio" id="id_servicio" value=""/>
-                    <input type="hidden" name="id_negocio" id="id_negocio" value=""/>
-                    <input type="hidden" name="id_whats" id="id_whats" value=""/>
-                    <input type="hidden" name="foto_perfil" id="foto_perfil" value=""/>
-                    <input type="hidden" name="foto" id="foto" value=""/>
-                    
-                    <!--begin::Input group-->
-                    <div class="row mb-6">
-                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Foto de perfil</label>
-                        <div class="col-lg-8">
-                            <div class="image-input image-input-outline" >
-                                <div class="image-input-wrapper w-125px h-125px" id="div_foto" style="background-image:  url('assets/media/svg/avatars/blank.svg')"></div>
-                                <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" id="btnSeleccionarFoto" data-bs-toggle="tooltip" title="Cambiar foto de perfil">
-                                    <i class="ki-duotone ki-pencil fs-7">
+            <div class="mb-5 hover-scroll-x">
+                <div class="d-grid">
+                    <ul class="nav nav-tabs flex-nowrap text-nowrap">
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-color-gray-600 btn-active-color-primary rounded-bottom-0 active" data-bs-toggle="tab" href="#whatsapp"><i class="ki-solid ki-whatsapp"></i> Whatsapp</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-color-gray-600 btn-active-color-primary rounded-bottom-0" data-bs-toggle="tab" id="tab_horarios" href="#horarios"><i class="ki-solid ki-time"></i> Horarios</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-color-gray-600 btn-active-color-primary rounded-bottom-0" data-bs-toggle="tab" href="#servicios"><i class="ki-solid ki-book-square"></i> Servicios</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="whatsapp" role="tabpanel">
+                    <div id="div_registro" class="d-flex flex-column flex-center text-justify mb-10 fs-5 fw-semibold text-gray-800">
+                        <form id="formNegocio" name="formNegocio" class="w-100" action="" >
+                            <input type="hidden" name="id_servicio" id="id_servicio" value=""/>
+                            <input type="hidden" name="id_negocio" id="id_negocio" value=""/>
+                            <input type="hidden" name="id_whats" id="id_whats" value=""/>
+                            <input type="hidden" name="foto_perfil" id="foto_perfil" value=""/>
+                            <input type="hidden" name="foto" id="foto" value=""/>
+                            <input type="hidden" id="nombre" name="nombre"/>
+                            
+                            <!--begin::Input group-->
+                            <div class="row mb-6">
+                                <label class="col-lg-4 col-form-label fw-semibold fs-6">Foto de perfil</label>
+                                <div class="col-lg-8">
+                                    <div class="image-input image-input-outline" >
+                                        <div class="image-input-wrapper w-125px h-125px" id="div_foto" style="background-image:  url('assets/media/svg/avatars/blank.svg')"></div>
+                                        <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" id="btnSeleccionarFoto" data-bs-toggle="tooltip" title="Cambiar foto de perfil">
+                                            <i class="ki-duotone ki-pencil fs-7">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                            </i>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <label class="col-lg-4 col-form-label fw-semibold fs-6">Dirección</label>
+                                <div class="col-lg-8">
+                                    <div class="row">
+                                        <div class="col-lg-6 fv-row">
+                                            <input type="text" name="address" id="address" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="Dirección del negocio" value="" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <label class="col-lg-4 col-form-label fw-semibold fs-6">Descripción</label>
+                                <div class="col-lg-8">
+                                    <div class="row">
+                                        <div class="col-lg-6 fv-row">
+                                            <textarea name="description" id="description" rows="3" class="form-control form-control-solid mb-lg-0" maxlength="512"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <label class="col-lg-4 col-form-label fw-semibold fs-6">Correo</label>
+                                <div class="col-lg-8">
+                                    <div class="row">
+                                        <div class="col-lg-6 fv-row">
+                                            <input type="email" name="email" id="email" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="contacto@tunegocio.com" value="" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <label class="col-lg-4 col-form-label fw-semibold fs-6">Pagina Web</label>
+                                <div class="col-lg-8">
+                                    <div class="row">
+                                        <div class="col-lg-6 fv-row">
+                                            <input type="text" name="website" id="website" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="https://www.tunegocio.com" value="" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center">
+                                <button id="btn_guardar" class="btn btn-primary">Actualizar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="horarios" role="tabpanel">
+                    <div class="tab-pane fade show active" id="horarios" role="tabpanel">
+                        <div id="div_horarios" class="d-flex flex-column flex-center text-justify mb-10 fs-5 fw-semibold text-gray-800">
+                            <form id="formHorarios" name="formHorarios" class="w-100" action="" >
+                                <div class="row mb-2">
+                                    <div class="col-lg-8">
+                                        <div class="row">
+                                            <div class="col-lg-6 fv-row">
+                                                <div class="py-2">
+                                                    <!--begin::Item-->
+                                                    <div class="d-flex flex-column">
+                                                        <div class="d-flex flex-stack">
+                                                            <div class="d-flex">
+                                                                <strong>Lunes</strong>
+                                                            </div>
+                                                            <div class="d-flex justify-content-end">
+                                                                <div class="form-check form-check-solid form-check-custom form-switch">
+                                                                    <input class="form-check-input w-45px h-30px" type="checkbox" name="dias[lunes][activo]" data-dia="lunes" id="lunes">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mb-8" id="div_lunes" style="display: none;">
+                                                            <div class="col-6">
+                                                                <div class="col-xl-12">
+                                                                    <div class="fs-6 fw-semibold mt-2 mb-3">Abre</div>
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <input type="time" name="dias[lunes][inicio]" id="lunes_inicio" class="form-control form-control-solid" value="09:00">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="col-xl-12">
+                                                                    <div class="fs-6 fw-semibold mt-2 mb-3">Cierra</div>
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <input type="time" name="dias[lunes][fin]" id="lunes_fin" class="form-control form-control-solid" value="18:00">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!--end::Item-->
+                                                    <div class="separator separator-dashed my-5"></div>
+                                                    <!--begin::Item-->
+                                                    <div class="d-flex flex-column">
+                                                        <div class="d-flex flex-stack">
+                                                            <div class="d-flex">
+                                                                <strong>Martes</strong>
+                                                            </div>
+                                                            <div class="d-flex justify-content-end">
+                                                                <div class="form-check form-check-solid form-check-custom form-switch">
+                                                                    <input class="form-check-input w-45px h-30px" type="checkbox" name="dias[martes][activo]" data-dia="martes" id="martes">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mb-8" id="div_martes" style="display: none;">
+                                                            <div class="col-6">
+                                                                <div class="col-xl-12">
+                                                                    <div class="fs-6 fw-semibold mt-2 mb-3">Abre</div>
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <input type="time" name="dias[martes][inicio]" id="martes_inicio" class="form-control form-control-solid" value="09:00">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="col-xl-12">
+                                                                    <div class="fs-6 fw-semibold mt-2 mb-3">Cierra</div>
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <input type="time" name="dias[martes][fin]" id="martes_fin" class="form-control form-control-solid" value="18:00">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!--end::Item-->
+                                                    <div class="separator separator-dashed my-5"></div>
+                                                    <!--begin::Item-->
+                                                    <div class="d-flex flex-column">
+                                                        <div class="d-flex flex-stack">
+                                                            <div class="d-flex">
+                                                                <strong>Miércoles</strong>
+                                                            </div>
+                                                            <div class="d-flex justify-content-end">
+                                                                <div class="form-check form-check-solid form-check-custom form-switch">
+                                                                    <input class="form-check-input w-45px h-30px" type="checkbox" name="dias[miercoles][activo]" data-dia="miercoles" id="miercoles">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mb-8" id="div_miercoles" style="display: none;">
+                                                            <div class="col-6">
+                                                                <div class="col-xl-12">
+                                                                    <div class="fs-6 fw-semibold mt-2 mb-3">Abre</div>
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <input type="time" name="dias[miercoles][inicio]" id="miercoles_inicio" class="form-control form-control-solid" value="09:00">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="col-xl-12">
+                                                                    <div class="fs-6 fw-semibold mt-2 mb-3">Cierra</div>
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <input type="time" name="dias[miercoles][fin]" id="miercoles_fin" class="form-control form-control-solid" value="18:00">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!--end::Item-->
+                                                    <div class="separator separator-dashed my-5"></div>
+                                                    <!--begin::Item-->
+                                                    <div class="d-flex flex-column">
+                                                        <div class="d-flex flex-stack">
+                                                            <div class="d-flex">
+                                                                <strong>Jueves</strong>
+                                                            </div>
+                                                            <div class="d-flex justify-content-end">
+                                                                <div class="form-check form-check-solid form-check-custom form-switch">
+                                                                    <input class="form-check-input w-45px h-30px" type="checkbox" name="dias[jueves][activo]" data-dia="jueves" id="jueves">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mb-8" id="div_jueves" style="display: none;">
+                                                            <div class="col-6">
+                                                                <div class="col-xl-12">
+                                                                    <div class="fs-6 fw-semibold mt-2 mb-3">Abre</div>
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <input type="time" name="dias[jueves][inicio]" id="jueves_inicio" class="form-control form-control-solid" value="09:00">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="col-xl-12">
+                                                                    <div class="fs-6 fw-semibold mt-2 mb-3">Cierra</div>
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <input type="time" name="dias[jueves][fin]" id="jueves_fin" class="form-control form-control-solid" value="18:00">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!--end::Item-->
+                                                    <div class="separator separator-dashed my-5"></div>
+                                                    <!--begin::Item-->
+                                                    <div class="d-flex flex-column">
+                                                        <div class="d-flex flex-stack">
+                                                            <div class="d-flex">
+                                                                <strong>Viernes</strong>
+                                                            </div>
+                                                            <div class="d-flex justify-content-end">
+                                                                <div class="form-check form-check-solid form-check-custom form-switch">
+                                                                    <input class="form-check-input w-45px h-30px" type="checkbox" name="dias[viernes][activo]" data-dia="viernes" id="viernes">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mb-8" id="div_viernes" style="display: none;">
+                                                            <div class="col-6">
+                                                                <div class="col-xl-12">
+                                                                    <div class="fs-6 fw-semibold mt-2 mb-3">Abre</div>
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <input type="time" name="dias[viernes][inicio]" id="viernes_inicio" class="form-control form-control-solid" value="09:00">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="col-xl-12">
+                                                                    <div class="fs-6 fw-semibold mt-2 mb-3">Cierra</div>
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <input type="time" name="dias[viernes][fin]" id="viernes_fin" class="form-control form-control-solid" value="18:00">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!--end::Item-->
+                                                    <div class="separator separator-dashed my-5"></div>
+                                                    <!--begin::Item-->
+                                                    <div class="d-flex flex-column">
+                                                        <div class="d-flex flex-stack">
+                                                            <div class="d-flex">
+                                                                <strong>Sábado</strong>
+                                                            </div>
+                                                            <div class="d-flex justify-content-end">
+                                                                <div class="form-check form-check-solid form-check-custom form-switch">
+                                                                    <input class="form-check-input w-45px h-30px" type="checkbox" name="dias[sabado][activo]" data-dia="sabado" id="sabado">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mb-8" id="div_sabado" style="display: none;">
+                                                            <div class="col-6">
+                                                                <div class="col-xl-12">
+                                                                    <div class="fs-6 fw-semibold mt-2 mb-3">Abre</div>
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <input type="time" name="dias[sabado][inicio]" id="sabado_inicio" class="form-control form-control-solid" value="09:00">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="col-xl-12">
+                                                                    <div class="fs-6 fw-semibold mt-2 mb-3">Cierra</div>
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <input type="time" name="dias[sabado][fin]" id="sabado_fin" class="form-control form-control-solid" value="18:00">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!--end::Item-->
+                                                    <div class="separator separator-dashed my-5"></div>
+                                                    <!--begin::Item-->
+                                                    <div class="d-flex flex-column">
+                                                        <div class="d-flex flex-stack">
+                                                            <div class="d-flex">
+                                                                <strong>Domingo</strong>
+                                                            </div>
+                                                            <div class="d-flex justify-content-end">
+                                                                <div class="form-check form-check-solid form-check-custom form-switch">
+                                                                    <input class="form-check-input w-45px h-30px" type="checkbox" name="dias[domingo][activo]" data-dia="domingo" id="domingo">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mb-8" id="div_domingo" style="display: none;">
+                                                            <div class="col-6">
+                                                                <div class="col-xl-12">
+                                                                    <div class="fs-6 fw-semibold mt-2 mb-3">Abre</div>
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <input type="time" name="dias[domingo][inicio]" id="domingo_inicio" class="form-control form-control-solid" value="09:00">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="col-xl-12">
+                                                                    <div class="fs-6 fw-semibold mt-2 mb-3">Cierra</div>
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <input type="time" name="dias[domingo][fin]" id="domingo_fin" class="form-control form-control-solid" value="18:00">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!--end::Item-->
+                                                    <div class="separator separator-dashed my-5"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-center">
+                                    <button id="btn_guardar_horarios" class="btn btn-primary">Actualizar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="servicios" role="tabpanel">
+                    <div id="div_general">
+                        <div class="d-flex flex-column text-justify mb-10 fs-5 fw-semibold text-gray-800">
+                            <p class="mt-5"><strong>Categorias</strong></p>
+                            <div class="d-flex flex-column gap-5" id="div_categorias" style="height: 100px;overflow: scroll;"></div>
+                            <div class="separator my-7"></div>
+    
+                            <label class="fs-6 fw-semibold form-label">Nueva categoria</label>
+                            <form id="formCategoria" class="d-flex align-items-center position-relative w-100 m-0" action="" method="POST">
+                                <div class="input-group">
+                                    <input type="text" class="form-control form-control-solid" id="categoria" name="categoria" placeholder="Nombre de la categoria" />
+                                    <button class="btn btn-icon btn-light" id="btn_nueva_categoria">
+                                        <i class="ki-solid ki-plus-square fs-2"></i>
+                                    </button>
+                                </div>
+                                <div id="error_categoria"></div>
+                            </form>
+                            <div class="separator my-7"></div>
+                            <button id="btn_nuevo_servicio" class="btn btn-primary w-100">
+                                <i class="ki-solid ki-setting-3 fs-2"></i>Nuevo servicio
+                            </button>
+                            
+                        </div>
+    
+                        <div class="col-lg-6 col-xl-3" id="div_buscar">
+                            <div class="card card-flush">
+                                <div class="card-header pt-7">
+                                    <form class="d-flex align-items-center position-relative w-100 m-0" autocomplete="off">
+                                        <i class="ki-duotone ki-magnifier fs-3 text-gray-500 position-absolute top-50 ms-5 translate-middle-y">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i>
+                                        <input type="text" class="form-control form-control-solid ps-13" name="busqueda" id="busqueda" value="" placeholder="Buscar" />
+                                    </form>
+                                </div>
+                                <div class="card-body pt-5" >
+                                    <div class="scroll-y me-n5 pe-5 h-300px h-xl-auto" data-kt-scroll="true" data-kt-scroll-activate="{ldelim}default: false, lg: true{rdelim}" data-kt-scroll-max-height="auto" data-kt-scroll-offset="5px" id="div_servicios"></div>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="col-lg-6 col-xl-3" id="div_registro_servicio" style="display: none;">
+                            <div class="d-flex flex-column flex-center text-justify mb-10 fs-5 fw-semibold text-gray-800">
+                                <form id="formServicio" name="formServicio" class="w-100" action="" >
+                                    <input type="hidden" name="id_servicio" id="id_negocio_servicio" value="0">
+                                    <p>Ingresa los datos necesarios para dar de alta el servicio.</p>
+                                    <div class="row mb-2">
+                                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Nombre del servicio</label>
+                                        <div class="col-lg-8">
+                                            <div class="row">
+                                                <div class="col-lg-6 fv-row">
+                                                    <input type="text" name="servicio" id="servicio" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="" value="" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Descripción</label>
+                                        <div class="col-lg-8">
+                                            <div class="row">
+                                                <div class="col-lg-6 fv-row">
+                                                    <textarea name="descripcion" id="descripcion" rows="3" class="form-control form-control-solid mb-lg-0" maxlength="512"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Duración (minutos)</label>
+                                        <div class="col-lg-8">
+                                            <div class="row">
+                                                <div class="col-lg-6 fv-row">
+                                                    <input type="number" name="duracion_minutos" id="duracion_minutos" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="" value="30" min="30" step="5" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Precio</label>
+                                        <div class="col-lg-8">
+                                            <div class="row">
+                                                <div class="col-lg-6 fv-row">
+                                                    <input type="number" name="precio" id="precio" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" step="0.01" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Categoria</label>
+                                        <div class="col-lg-8">
+                                            <div class="row">
+                                                <div class="col-lg-6 fv-row">
+                                                    <select class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" id="id_categoria" name="id_categoria"></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch form-check-custom form-check-solid me-10">
+                                        <input class="form-check-input h-20px w-30px" type="checkbox" checked name="activo" id="activo"/>
+                                        <label class="form-check-label" for="activo">
+                                            Activo
+                                        </label>
+                                    </div>
+    
+                                    <div class="text-center mt-5">
+                                        <button type="button" onclick="mostrar_ocultar('div_buscar','div_registro_servicio');limpiarForm('formServicio')" class="btn btn-secondary">Cancelar</button>
+                                        <button id="btn_guardar_servicio" class="btn btn-primary">Guardar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Posteriormente hacer un desglozado por servicio para ver que puedo meter ahí -->
+                    <div id="div_servicio_informacion" style="display: none;">
+                        <div class="card card-flush h-lg-100 contenido" id="clientes_informacion">
+                            <div class="card-header pt-7" id="kt_chat_contacts_header">
+                                <div class="card-title">
+                                    <p id="titulo_servicio"></p>
+                                </div>
+                                <!-- <div class="card-toolbar gap-3">
+                                    <a class="btn btn-sm btn-light btn-primary">
+                                    <i class="ki-duotone ki-message-add fs-2">
                                         <span class="path1"></span>
                                         <span class="path2"></span>
-                                    </i>
-                                </label>
+                                        <span class="path3"></span>
+                                    <a class="btn btn-sm btn-light btn-primary">
+                                    <i class="ki-duotone ki-message-add fs-2">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                    </i>Pago</a>
+                                </div> -->
                             </div>
-                        </div>
-                    </div>
-                    <div class="row mb-2">
-                        <label class="col-lg-4 col-form-label required fw-semibold fs-6">Nombre del negocio</label>
-                        <div class="col-lg-8">
-                            <div class="row">
-                                <div class="col-lg-6 fv-row">
-                                    <input type="text" id="nombre" name="nombre" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" readonly />
+                            
+                            <div class="card-body pt-5">
+                                <div class="d-flex gap-7 align-items-center">
+                                    <div class="symbol symbol-circle symbol-100px">
+                                        <img src="img/icono_user_.png" alt="image" />
+                                    </div>
+                                    <div class="d-flex flex-column gap-2">
+                                        <h3 class="mb-0" id="nombre_cliente"></h3>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="ki-duotone ki-phone fs-2">
+                                                <span class="path1"></span>
+                                                <span class="path2"></span>
+                                            </i>
+                                            <a class="text-muted text-hover-primary" id="celular_cliente"></a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <ul class="nav nav-custom nav-tabs nav-line-tabs nav-line-tabs-2x fs-6 fw-semibold mt-6 mb-8 gap-2">
+                                    <li class="nav-item">
+                                        <a class="nav-link text-active-primary d-flex align-items-center pb-4 active" data-bs-toggle="tab" href="#general">
+                                        <i class="ki-duotone ki-home fs-4 me-1"></i>General</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link text-active-primary d-flex align-items-center pb-4" data-bs-toggle="tab" href="#pedidos">
+                                        <i class="ki-duotone ki-parcel fs-4 me-1">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                            <span class="path3"></span>
+                                            <span class="path4"></span>
+                                            <span class="path5"></span>
+                                        </i>Pedidos</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link text-active-primary d-flex align-items-center pb-4" data-bs-toggle="tab" href="#pagos">
+                                        <i class="ki-duotone ki-dollar fs-4 me-1">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                            <span class="path3"></span>
+                                        </i>Pagos</a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content" id="">
+                                    <div class="tab-pane fade show active" id="general" role="tabpanel">
+                                        <div class="d-flex flex-column gap-5 mt-7">
+                                            <div class="d-flex flex-column gap-1 d-none" id="div_pendiente">
+                                                <div class="fw-bold text-danger">Saldo pendiente</div>
+                                                <div class="fw-bold fs-5">$100,00.00</div>
+                                            </div>
+                                            <div class="d-flex flex-column gap-1">
+                                                <div class="fw-bold text-muted">Información</div>
+                                                <p id="informacion_cliente"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="pedidos" role="tabpanel">
+                                        <div class="d-flex flex-stack position-relative my-6">
+                                            <div class="position-absolute h-100 w-4px bg-info rounded top-0 start-0"></div>
+                                            <div class="fw-semibold ms-5 text-gray-600">
+                                                <div class="fs-5">16:30 - 17:30 
+                                                <span class="fs-7 text-gray-500 text-uppercase">pm</span></div>
+                                                <a class="fs-5 fw-bold text-gray-800 text-hover-primary mb-2">Lunch & Learn Catch Up</a>
+                                                <div class="text-gray-500">Lead by <a>Yannis Gloverson</a></div>
+                                            </div>
+                                            <a class="btn btn-bg-light btn-active-color-primary btn-sm">View</a>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="pagos" role="tabpanel">
+                                        <div class="timeline-label">
+                                            <div class="timeline-item">
+                                                <div class="timeline-label fw-bold text-gray-800 fs-6">08:42</div>
+                                                <div class="timeline-badge">
+                                                    <i class="ki-duotone ki-abstract-8 text-warning fs-1">
+                                                        <span class="path1"></span>
+                                                        <span class="path2"></span>
+                                                    </i>
+                                                </div>
+                                                <div class="fw-mormal timeline-content text-muted ps-3">Outlines keep you honest. And keep structure</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row mb-2">
-                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Acerca de</label>
-                        <div class="col-lg-8">
-                            <div class="row">
-                                <div class="col-lg-6 fv-row">
-                                    <textarea name="about" id="about" rows="3" class="form-control form-control-solid mb-lg-0" maxlength="139"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mb-2">
-                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Dirección</label>
-                        <div class="col-lg-8">
-                            <div class="row">
-                                <div class="col-lg-6 fv-row">
-                                    <input type="text" name="address" id="address" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="Dirección del negocio" value="" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mb-2">
-                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Descripción</label>
-                        <div class="col-lg-8">
-                            <div class="row">
-                                <div class="col-lg-6 fv-row">
-                                    <textarea name="description" id="description" rows="3" class="form-control form-control-solid mb-lg-0" maxlength="512"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mb-2">
-                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Correo</label>
-                        <div class="col-lg-8">
-                            <div class="row">
-                                <div class="col-lg-6 fv-row">
-                                    <input type="email" name="email" id="email" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="contacto@tunegocio.com" value="" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mb-2">
-                        <label class="col-lg-4 col-form-label fw-semibold fs-6">Pagina Web</label>
-                        <div class="col-lg-8">
-                            <div class="row">
-                                <div class="col-lg-6 fv-row">
-                                    <input type="text" name="website" id="website" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="https://www.tunegocio.com" value="" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="text-center">
-                        <button id="btn_guardar" class="btn btn-primary">Actualizar</button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>

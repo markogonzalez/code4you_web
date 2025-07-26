@@ -8,6 +8,7 @@
 
 	class utilidades extends database{
         public $sesion = [];
+        public $dias_semana = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
 
         public function __construct() {
             parent::__construct();
@@ -33,23 +34,65 @@
             
         }
 
-        public function getNegocioUsuario($params=null){
-            error_log(print_r($params,true));
+        public function getNegocioUsuario($params = null) {
+            
             $negocio = null;
-            $id_usuario    = $this->cleanQuery($params["id_usuario"] ?? 0);
-            $id_servicio    = $this->cleanQuery($params["id_servicio"] ?? 0);
-            $qry_negocio = "SELECT * FROM cliente_negocio WHERE id_usuario =".$id_usuario." AND id_servicio =".$id_servicio." AND activo = 1";
-            $res = $this->query($qry_negocio);
-            if($res->num_rows > 0){
-                $negocio = $res->fetch_assoc();
+            $total_servicios = 0;
+            $id_usuario = $this->cleanQuery($params["id_usuario"] ?? 0);
+            $id_servicio = $this->cleanQuery($params["id_servicio"] ?? 0);
+
+            $qry = "SELECT *,n.id_negocio as id_negocio_cliente,s.total_servicios,h.activo as horario_activo FROM cliente_negocio n 
+                    LEFT JOIN negocio_horarios h ON n.id_negocio = h.id_negocio 
+                    LEFT JOIN (SELECT COUNT(*) as total_servicios,id_negocio FROM negocio_servicios ) as s ON n.id_negocio = s.id_negocio
+                    WHERE n.id_usuario = $id_usuario AND n.id_servicio = $id_servicio AND n.activo = 1";
+            
+            $res = $this->query($qry);
+
+            if ($res->num_rows > 0) {
+                $horarios = [];
+                $negocioBase = null;
+
+                while ($row = $res->fetch_assoc()) {
+
+                    $negocioBase = [
+                        "address" => $row['address'],
+                        "description" => $row['description'],
+                        "email" => $row['email'],
+                        "fecha_creacion" => $row['fecha_creacion'],
+                        "foto_perfil" => $row['foto_perfil'],
+                        "nombre_negocio" => $row['nombre_negocio'],
+                        "numero_negocio" => $row['numero_negocio'],
+                        "status" => $row['status'],
+                        "website" => $row['website'],
+                        "ultima_verificacion" => $row['ultima_verificacion'],
+                        "id_negocio" => $row['id_negocio_cliente'],
+                        "id_whats" => $row['id_whats'],
+                        "total_servicios" => $row['total_servicios'],
+                    ];
+                    if ($row['dia'] != null) {
+                        $horarios[$row['dia']] = [
+                            'dia' => $row['dia'],
+                            'inicio' => $row['hora_inicio'],
+                            'fin' => $row['hora_fin'],
+                            'activo' => $row['horario_activo']
+                        ];
+                    }
+                    
+                }
                 
-                $tsUltimo = strtotime($negocio['ultima_verificacion']);
-                $tsDisponible = $tsUltimo + 600; // 10 minutos
+                
+                $tsUltimo = strtotime($negocioBase['ultima_verificacion']);
+                $tsDisponible = $tsUltimo + 600;
                 $ahora = time();
                 $faltan = max(0, $tsDisponible - $ahora);
-                $negocio['falta_reenviar'] = $faltan;
+
+                $negocioBase['falta_reenviar'] = $faltan;
+                $negocioBase['horarios'] = $horarios;
+
+                return ["OK", $negocioBase];
             }
-            return ["OK",$negocio];
+
+            return ["OK", null];
         }
 
         public function openpay($params = null){
@@ -159,7 +202,7 @@
 
                 // Validaciones
                 if($row['vista']!=""){
-                    if (!$arrPermisos['permisos'][$id]['r']) continue;
+                    if (!isset($arrPermisos['permisos'][$id]) || !$arrPermisos['permisos'][$id]['r']) continue;
                     if ($row['pago'] == 1 && !isset($modulos_pagados[$id])) continue;
                 }
 

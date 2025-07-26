@@ -68,6 +68,95 @@ class whats extends utilidades {
         ];
     }
 
+    public function enviarRespuesta($params = null) {
+
+        $destinatario = isset($params["destinatario"]) ? $this->normalizarNumeroWhatsapp($params["destinatario"]) : false;
+        $mensaje     = isset($params["mensaje"]) ? $params["mensaje"] : "";
+        $tipo        = isset($params["tipo"]) ? $params["tipo"] : "";
+        $template    = isset($params["template"]) ? $params["template"] : "";
+        $variables   = isset($params["variables"]) && is_array($params["variables"]) ? $params["variables"] : [];
+        $botones     = isset($params["botones"]) && is_array($params["botones"]) ? $params["botones"] : [];
+        $id_whats = isset($params["id_whats"]) ? $this->cleanQuery($params["id_whats"]) : "";
+        $idioma_plantilla = isset($params["idioma_plantilla"]) ? $this->cleanQuery($params["idioma_plantilla"]) : "es_MX";
+
+        $url = "https://graph.facebook.com/".WHATS_VERSION."/".$id_whats."/messages";
+
+        $data = [
+            "messaging_product" => "whatsapp",
+            "to" => $destinatario,
+        ];
+
+        if($tipo === "text"){
+
+            $data["type"] = "text";
+            $data["text"] = ["body" => $mensaje];
+        
+        }elseif ($tipo === "template"){
+
+            if (empty($template)) {
+                $codigo = "ERR";
+                return [$codigo, ["mensaje_error" => "El nombre del template está vacío"]];
+            }
+
+            $params_array = [];
+            foreach ($variables as $valor) {
+                $params_array[] = [
+                    "type" => "text",
+                    "text" => $valor
+                ];
+            }
+
+            $componentes = [];
+
+            if (!empty($params_array)) {
+                $componentes[] = [
+                    "type" => "body",
+                    "parameters" => $params_array
+                ];
+            }
+
+            if (!empty($botones)) {
+                foreach ($botones as $i => $btn) {
+                    if (!isset($btn['sub_type']) || !isset($btn['param'])) continue;
+
+                    $subtype = $btn['sub_type'];
+                    $param_value = $btn['param'];
+                    $param_type = in_array($subtype, ['quick_reply', 'flow']) ? 'payload' : 'text';
+
+                    $componentes[] = [
+                        "type" => "button",
+                        "sub_type" => $subtype,
+                        "index" => (string) $i,
+                        "parameters" => [
+                            [
+                                "type" => $param_type,
+                                $param_type => $param_value
+                            ]
+                        ]
+                    ];
+                }
+            }
+
+            $data["type"] = "template";
+            $data["template"] = [
+                "name" => $template,
+                "language" => ["code" => $idioma_plantilla],
+            ];
+
+            if (!empty($componentes)) {
+                $data["template"]["components"] = $componentes;
+            }
+
+        }else{
+            $codigo = "ERR";
+            return [$codigo, ["mensaje_error" => "Tipo no valido"]];
+        }
+
+        // Enviar la petición con Guzzle
+        list($codigoApi,$response) = $this->request("POST", $url, $data);
+        return [$codigoApi,$response];
+    }
+
     public function registrarNumero($params = null) {
         
         $codigo = "OK";
@@ -190,183 +279,28 @@ class whats extends utilidades {
         return [$codigo,$response];
     }
 
-    public function enviarRespuesta($params = null) {
 
-        $destinatario = isset($params["destinatario"]) ? $this->normalizarNumeroWhatsapp($params["destinatario"]) : false;
-        $mensaje     = isset($params["mensaje"]) ? $params["mensaje"] : "";
-        $tipo        = isset($params["tipo"]) ? $params["tipo"] : "";
-        $template    = isset($params["template"]) ? $params["template"] : "";
-        $variables   = isset($params["variables"]) && is_array($params["variables"]) ? $params["variables"] : [];
-        $botones     = isset($params["botones"]) && is_array($params["botones"]) ? $params["botones"] : [];
+    public function actualizarPerfil($params = null){
+
         $id_whats = isset($params["id_whats"]) ? $this->cleanQuery($params["id_whats"]) : "";
-        $idioma_plantilla = isset($params["idioma_plantilla"]) ? $this->cleanQuery($params["idioma_plantilla"]) : "es_MX";
-
-        $url = "https://graph.facebook.com/".WHATS_VERSION."/".$id_whats."/messages";
-
-        $data = [
-            "messaging_product" => "whatsapp",
-            "to" => $destinatario,
-        ];
-
-        if($tipo === "text"){
-
-            $data["type"] = "text";
-            $data["text"] = ["body" => $mensaje];
-        
-        }elseif ($tipo === "template"){
-
-            if (empty($template)) {
-                $codigo = "ERR";
-                return [$codigo, ["mensaje_error" => "El nombre del template está vacío"]];
-            }
-
-            $params_array = [];
-            foreach ($variables as $valor) {
-                $params_array[] = [
-                    "type" => "text",
-                    "text" => $valor
-                ];
-            }
-
-            $componentes = [];
-
-            if (!empty($params_array)) {
-                $componentes[] = [
-                    "type" => "body",
-                    "parameters" => $params_array
-                ];
-            }
-
-            if (!empty($botones)) {
-                foreach ($botones as $i => $btn) {
-                    if (!isset($btn['sub_type']) || !isset($btn['param'])) continue;
-
-                    $subtype = $btn['sub_type'];
-                    $param_value = $btn['param'];
-                    $param_type = in_array($subtype, ['quick_reply', 'flow']) ? 'payload' : 'text';
-
-                    $componentes[] = [
-                        "type" => "button",
-                        "sub_type" => $subtype,
-                        "index" => (string) $i,
-                        "parameters" => [
-                            [
-                                "type" => $param_type,
-                                $param_type => $param_value
-                            ]
-                        ]
-                    ];
-                }
-            }
-
-            $data["type"] = "template";
-            $data["template"] = [
-                "name" => $template,
-                "language" => ["code" => $idioma_plantilla],
-            ];
-
-            if (!empty($componentes)) {
-                $data["template"]["components"] = $componentes;
-            }
-
-        }else{
-            $codigo = "ERR";
-            return [$codigo, ["mensaje_error" => "Tipo no valido"]];
-        }
-
-        // Enviar la petición con Guzzle
-        list($codigoApi,$response) = $this->request("POST", $url, $data);
-        return [$codigoApi,$response];
-    }
-
-    public function actualizarPerfil($params = null) {
-        $codigo = "OK";
-        $data = [];
-
-        // Sanitización de parámetros
-        $id_servicio = isset($params["id_servicio"]) ? $this->cleanQuery($params["id_servicio"]) : 0;
-        $id_negocio = isset($params["id_negocio"]) ? $this->cleanQuery($params["id_negocio"]) : 0;
-        $id_whats = isset($params["id_whats"]) ? $this->cleanQuery($params["id_whats"]) : "";
-        $foto_perfil = isset($params["foto_perfil"]) ? $this->cleanQuery($params["foto_perfil"]) : "";
-        $nombre = isset($params["nombre"]) ? $this->cleanQuery($params["nombre"]) : "";
         $about = isset($params["about"]) ? $this->cleanQuery($params["about"]) : "";
-        $address = isset($params["address"]) ? $this->cleanQuery($params["address"]) : "";
         $description = isset($params["description"]) ? $this->cleanQuery($params["description"]) : "";
+        $address = isset($params["address"]) ? $this->cleanQuery($params["address"]) : "";
         $email = isset($params["email"]) ? $this->cleanQuery($params["email"]) : "";
         $website = isset($params["website"]) ? $this->cleanQuery($params["website"]) : "";
-        $fotoBase64 =  isset($params["foto"]) ? $this->cleanQuery($params["foto"]) : "";
-        
-        if ($fotoBase64 != "") {
-            $fotoData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $fotoBase64));
-        
-            // Crear nombre único del archivo
-            $nombreArchivo = 'perfil_' . $this->sesion['id_usuario'] . '_' . time() . '.jpg';
-        
-            // Ruta del directorio de perfiles
-            $directorio = __DIR__ . '/../uploads/perfiles/';
-        
-            // Verificar si el directorio existe, si no, crearlo
-            if (!is_dir($directorio)) {
-                if (!mkdir($directorio, 0755, true)) {
-                    return ["ERR", ["mensaje_error" => "No se pudo crear el directorio de destino"]];
-                }
-            }
-        
-            // Ruta completa del archivo 
-            $ruta = $directorio . $nombreArchivo;
-        
-            // Guardar la imagen
-            if (file_put_contents($ruta, $fotoData)) {
-                list($codigo, $response) = $this->enviarRespuesta([
-                    "id_whats" => WHATS_PHONE_ID,
-                    "destinatario" => DESTINATARIO_CODE4YOU,
-                    "tipo" => "template",
-                    "template" => "app_cambio_imagen",
-                    "variables" => [$nombre, $nombreArchivo],
-                ]);
-                if ($codigo != "OK") {
-                    return ["ERR", ["mensaje_error" => "Error al subir foto de perfil"]];
-                }
-                $foto_perfil = $nombreArchivo;
-            } else {
-                return ["ERR", ["mensaje_error" => "Error al guardar la imagen en el servidor"]];
-            }
-        }
 
         $url = "https://graph.facebook.com/" . WHATS_VERSION . "/" . $id_whats . "/whatsapp_business_profile";
 
-        list($codigoApi, $response) = $this->request('POST', $url, [
+        list($codigo, $response) = $this->request('POST', $url, [
             "messaging_product" => "whatsapp",
-            "about" => $about,
             "description" => $description,
             "address" => $address,
             "email" => $email,
-            "website" => [$website],
+            "website" => $website,
         ]);
 
-        if ($codigoApi !== "OK") {
-            return ["ERR", $response];
-        }
-
-        $qry_update = "
-            UPDATE cliente_negocio SET
-            about = '".$about."',
-            description = '".$description."',
-            address = '".$address."',
-            email = '".$email."',
-            website = '".$website."',
-            foto_perfil = '".$foto_perfil."'
-            WHERE id_negocio = ".$id_negocio."
-        ";
-
-        $this->query($qry_update);
-
-        $data = [
-            "mensaje" => "Perfil actualizado correctamente.",
-            "meta_response" => $response
-        ];
-
-        return [$codigo, $data];
+        return [$codigo,$response];
+        
     }
 
 
