@@ -1,5 +1,5 @@
 <?php
-    include_once("../config.inc.php");
+    include_once(__DIR__ . '/../config.inc.php');
     require ruta_relativa.'/vendor/autoload.php';  // Ajusta la ruta si tu archivo está en otra carpeta
     include_once (core.'/database.php');
     use Firebase\JWT\JWT;
