@@ -18,9 +18,6 @@ class whats extends utilidades {
            'Authorization' => 'Bearer ' .WHATS_TOKEN,
             'Content-Type'  => 'application/json'
         ];
-        if(!$this->sesion){
-            return ["ERR", "No se ha iniciado sesión correctamente."];
-        }
         $this->openAI = new openAI();
         
     }

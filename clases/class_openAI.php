@@ -16,9 +16,6 @@ class openAI extends utilidades {
            'Authorization' => 'Bearer ' .OPENAI_TEST_KEY,
             'Content-Type'  => 'application/json'
         ];
-        if(!$this->sesion){
-            return ["ERR", "No se ha iniciado sesión correctamente."];
-        }
         
     }
 
