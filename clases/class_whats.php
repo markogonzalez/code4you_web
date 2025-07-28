@@ -31,8 +31,8 @@ class whats extends utilidades {
         if ($this->yaFueProcesado($mensaje_id)) return;
 
         // Obtener número del negocio al que escribieron
-        $id_whats = $data['entry'][0]['changes'][0]['value']['metadata']['phone_number_id'] ?? '';
-        $negocio = $this->getNegocioUsuario(["id_whats"=>$id_whats]); // debes crear esta función
+        $numero_negocio = $data['entry'][0]['changes'][0]['value']['metadata']['display_phone_number'] ?? '';
+        $negocio = $this->getNegocioUsuario(["numero_negocio"=>$numero_negocio]); // debes crear esta función
 
         // Datos del cliente que escribió
         $nombre = $data['entry'][0]['changes'][0]['value']['contacts'][0]["profile"]["name"] ?? '';
