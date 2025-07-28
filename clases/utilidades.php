@@ -38,13 +38,19 @@
             
             $negocio = null;
             $total_servicios = 0;
-            $id_usuario = $this->cleanQuery($params["id_usuario"] ?? 0);
-            $id_servicio = $this->cleanQuery($params["id_servicio"] ?? 0);
+            $id_usuario = isset($params["id_usuario"]) ? $this->cleanQuery($params["id_usuario"]) : 0;
+            $id_servicio = isset($params["id_servicio"]) ? $this->cleanQuery($params["id_servicio"]) : 0;
+            $id_whats = isset($params["id_whats"]) ? $this->cleanQuery($params["id_whats"]) : 0;
+
+            $condicion = " n.id_usuario = $id_usuario AND n.id_servicio = $id_servicio";
+            if($id_whats!=""){
+                $condicion = " n.id_whats ='".$id_whats."'";
+            }
 
             $qry = "SELECT *,n.id_negocio as id_negocio_cliente,s.total_servicios,h.activo as horario_activo,n.id_servicio as id_servicio_negocio FROM cliente_negocio n 
                     LEFT JOIN negocio_horarios h ON n.id_negocio = h.id_negocio 
                     LEFT JOIN (SELECT COUNT(*) as total_servicios,id_negocio FROM negocio_servicios ) as s ON n.id_negocio = s.id_negocio
-                    WHERE n.id_usuario = $id_usuario AND n.id_servicio = $id_servicio AND n.activo = 1";
+                    WHERE ".$condicion." AND n.activo = 1";
             
             $res = $this->query($qry);
 

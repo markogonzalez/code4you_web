@@ -47,7 +47,7 @@
             $correo = "";
             if(isset($params["correo"]) && $params["correo"] != "") 
             $correo = $this->cleanQuery($params["correo"]);
-
+            // Aqui hay un pedo se manda a llmaar en 3 lugares diferentes, donde funciona bien es en negocio_usuarios, considerar usuarios_lista y revisar el login el tema es en la contraseña
             $contrasena = $this->generarContrasenaAleatoria();
             $contrasena_insert = password_hash($contrasena, PASSWORD_DEFAULT);
             
@@ -62,6 +62,10 @@
             $id_servicio = 0;
             if(isset($params["id_servicio"]) && $params["id_servicio"] > 0) 
             $id_servicio = $this->cleanQuery($params["id_servicio"]);
+
+            $id_negocio = 0;
+            if(isset($params["id_negocio"]) && $params["id_negocio"] > 0) 
+            $id_negocio = $this->cleanQuery($params["id_negocio"]);
 
             $user_repeat = "SELECT * FROM master_usuarios WHERE celular ='".$celular."' AND perfil_id =".$perfil_id." AND status = 1";
             $res_repeat = $this->query($user_repeat);
@@ -104,10 +108,12 @@
                     if(isset($this->sesion['perfil_id']) && $this->sesion['perfil_id']==2){
                         $qry_insert = " INSERT INTO cliente_trabajador (
                             id_usuario_cliente,
-                            id_usuario_trabajador
+                            id_usuario_trabajador,
+                            id_negocio
                         ) VALUES (
                             ".$this->sesion['id_usuario'].",
-                            ".$id_insert."
+                            ".$id_insert.",
+                            ".$id_negocio."
                         ) ";
                         if($this->query($qry_insert)){
                             list($codigo,$negocio) = $this->getNegocioUsuario(["id_usuario"=>$this->sesion['id_usuario'],"id_servicio"=>$id_servicio]);

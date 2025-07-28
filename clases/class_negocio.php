@@ -339,6 +339,143 @@
 
         }
 
+        // Funciones para bot
+        public function checkDisponibilidad($params = null) {
+            
+            $id_trabajador = isset($params["id_trabajador"]) ? $this->cleanQuery($params["id_trabajador"]) : 0;
+            $fecha = isset($params["fecha"]) ? $this->cleanQuery($params["fecha"]) : "";
+            $duracion_minutos = isset($params["duracion_minutos"]) ? $this->cleanQuery($params["duracion_minutos"]) : 0;
+            $slots_disponibles = [];
+
+            // 1. Día de la semana en español
+            $day = strtolower(date('l', strtotime($fecha)));
+            $traducciones = [
+                'sunday' => 'domingo',
+                'monday' => 'lunes',
+                'tuesday' => 'martes',
+                'wednesday' => 'miercoles',
+                'thursday' => 'jueves',
+                'friday' => 'viernes',
+                'saturday' => 'sabado'
+            ];
+
+            $dia_semana = $traducciones[$day] ?? null;
+            if (!$dia_semana) return false;
+
+            // 2. Obtener horario del trabajador para ese día
+            $sqlHorario = "SELECT hora_inicio, hora_fin FROM trabajador_horarios 
+                        WHERE id_usuario = $id_trabajador AND dia = '$dia_semana' AND activo = 1";
+
+            $res = $this->query($sqlHorario);
+
+            if ($res->num_rows == 0) return false;
+
+            $horario = $res->fetch_assoc();
+            $hora_inicio = $horario['hora_inicio'];
+            $hora_fin = $horario['hora_fin'];
+
+            $inicio_dia = strtotime("$fecha $hora_inicio");
+            $fin_dia = strtotime("$fecha $hora_fin");
+
+            // 3. Obtener citas ya agendadas ese día
+            $sqlCitas = "SELECT hora_inicio, duracion FROM master_citas 
+                        WHERE id_usuario = $id_trabajador AND fecha = '$fecha' AND estado = 'confirmada'";
+            $resCitas = $this->query($sqlCitas);
+            $bloques = [];
+
+            while ($row = $resCitas->fetch_assoc()) {
+                $inicio = strtotime("$fecha " . $row['hora_inicio']);
+                $fin = $inicio + ($row['duracion'] * 60);
+                $bloques[] = ['inicio' => $inicio, 'fin' => $fin];
+            }
+
+            // 4. Buscar bloques disponibles
+            $bloque_actual = $inicio_dia;
+            $requerido = $duracion_minutos * 60;
+
+            while (($bloque_actual + $requerido) <= $fin_dia) {
+                $bloque_valido = true;
+
+                foreach ($bloques as $bloque) {
+                    if (
+                        ($bloque_actual < $bloque['fin']) &&
+                        (($bloque_actual + $requerido) > $bloque['inicio'])
+                    ) {
+                        // Hay cruce con una cita
+                        $bloque_valido = false;
+                        $bloque_actual = $bloque['fin']; // Saltar al final de la cita
+                        break;
+                    }
+                }
+
+                if ($bloque_valido) {
+                    $slots_disponibles[] = date("H:i", $bloque_actual);
+                    $bloque_actual += $requerido;
+                }
+            }
+            return count($slots_disponibles) > 0 ? $slots_disponibles : false;
+        }
+
+        public function obtenerHorariosDisponibles($params = null) {
+            $codigo = "OK";
+            $resultado = [];
+
+            $id_servicio = isset($params["id_servicio"]) ? $this->cleanQuery($params["id_servicio"]) : 1;
+            $id_negocio = isset($params["id_negocio"]) ? $this->cleanQuery($params["id_negocio"]) : 10;
+            $fecha = isset($params["fecha"]) ? $this->cleanQuery($params["fecha"]) : "2025-07-28";
+            $id_barbero_favorito = isset($params["id_barbero_favorito"]) ? $this->cleanQuery($params["id_barbero_favorito"]) : null;
+
+
+            // 1. Obtener duración del servicio
+            $queryDuracion = "SELECT duracion FROM negocio_servicios WHERE id_servicio = $id_servicio";
+            $res = $this->query($queryDuracion);
+            if (!$res || $res->num_rows == 0) {
+                return ["ERROR", "Servicio no encontrado"];
+            }
+
+            $duracion = (int) $res->fetch_assoc()['duracion'];
+
+            // 2. Obtener barberos que ofrecen ese servicio
+            // $queryBarberos = "SELECT id_usuario FROM trabajador_servicio WHERE id_servicio = $id_servicio $filtro";
+            // $resBarberos = $this->query($queryBarberos);
+            // if (!$resBarberos || $resBarberos->num_rows == 0) {
+                //     return ["ERROR", "No hay barberos disponibles para ese servicio"];
+                // }
+                
+            $filtro = $id_barbero_favorito ? "AND ct.id_usuario = $id_barbero_favorito" : "";
+            $queryBarberos = "SELECT ct.id_usuario_trabajador as id_usuario,mu.nombre,ct.id_negocio FROM cliente_trabajador ct 
+                                LEFT JOIN master_usuarios mu ON ct.id_usuario_trabajador = mu.id_usuario 
+                                WHERE ct.id_negocio = $id_negocio $filtro";
+
+            $resBarberos = $this->query($queryBarberos);
+            if (!$resBarberos || $resBarberos->num_rows == 0) {
+                return ["ERROR", "No hay barberos disponibles para ese servicio"];
+            }
+
+            // 3. Buscar disponibilidad por barbero
+            while ($row = $resBarberos->fetch_assoc()) {
+                $id_trabajador = $row['id_usuario'];
+                $disponibles = $this->checkDisponibilidad([
+                    "id_trabajador"=>$id_trabajador,
+                    "fecha" => $fecha,
+                    "duracion_minutos" => $duracion]);
+
+                if ($disponibles && is_array($disponibles)) {
+                    $resultado[] = [
+                        "barbero" => $row['nombre'],
+                        "id_trabajador" => $id_trabajador,
+                        "horarios" => $disponibles
+                    ];
+
+                    // Si es favorito, solo necesitamos uno
+                    if ($id_barbero_favorito) break;
+                }
+            }
+
+            return count($resultado) > 0 ? [$codigo, $resultado] : ["ERR", "No hay horarios disponibles para ese día"];
+        }
+
+
     }
 
 ?>

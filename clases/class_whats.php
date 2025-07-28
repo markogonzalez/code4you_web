@@ -1,5 +1,6 @@
 <?php 
 include_once 'utilidades.php';
+include_once 'class_openAI.php';
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 
@@ -7,6 +8,7 @@ class whats extends utilidades {
 
     private $client;
     private $headers;
+    private $openAI;
    
     public function __construct() {
         parent::__construct();
@@ -19,7 +21,67 @@ class whats extends utilidades {
         if(!$this->sesion){
             return ["ERR", "No se ha iniciado sesión correctamente."];
         }
+        $this->openAI = new openAI();
         
+    }
+
+    public function procesarWebhookWhatsApp($params = null) {
+        $data = isset($params["data"]) ? json_decode($params["data"], true) : false;
+        if (!isset($data['entry'][0]['changes'][0]['value']['messages'][0])) return;
+
+        $mensaje = $data['entry'][0]['changes'][0]['value']['messages'][0];
+        $mensaje_id = $mensaje['id'] ?? '';
+        if ($this->yaFueProcesado($mensaje_id)) return;
+
+        // Obtener número del negocio al que escribieron
+        $id_whats = $data['entry'][0]['changes'][0]['value']['metadata']['phone_number_id'] ?? '';
+        $negocio = $this->getNegocioUsuario(["id_whats"=>$id_whats]); // debes crear esta función
+
+        // Datos del cliente que escribió
+        $nombre = $data['entry'][0]['changes'][0]['value']['contacts'][0]["profile"]["name"] ?? '';
+        $numero = $mensaje['from'];
+        $texto = strtolower(trim($mensaje['text']['body'] ?? ''));
+
+        // Buscar o crear cliente
+        $datos_cliente = $this->obtenerOInsertarCliente([
+            "numero" => $numero,
+            "nombre" => $nombre, 
+            "texto" => $texto,
+            "negocio" =>$negocio
+        ]);
+        $estado = $datos_cliente['estado'];
+        $id_cliente = $datos_cliente['id_cliente'];
+
+        if ($mensaje['type'] === 'interactive' && $mensaje['interactive']['type'] === 'nfm_reply') {
+            $this->guardarFlujo($datos_cliente, $mensaje);
+            $estado = "Ejecutivo";
+        }
+
+        // 3. Consultar ChatGPT para interpretar el mensaje
+        $interpretacion = $this->openAI->interpretarConChatGPT(["mensaje" => $texto]);
+        error_log("Respuesta de la interpretacion de chatGPT en el webhook de Whatsapp");
+        error_log(print_r($interpretacion,true));
+        // if (!$interpretacion) return;
+
+        // $json = json_decode($interpretacion, true);
+        // $intencion = $json['intencion'] ?? 'otra';
+        // $respuesta = $json['respuesta'] ?? '';
+
+        // // 4. Si es conocer_servicios o no entendió nada, respondemos con servicios
+        // if ($intencion === 'conocer_servicios' || $intencion === 'otra') {
+        //     $this->enviarServiciosDisponibles($numero, $negocio['id_negocio']);
+        //     return;
+        // }
+
+        // // 5. Si hay respuesta del modelo, mándala
+        // if ($respuesta) {
+        //     $this->enviarMensajeWhatsApp($numero, $respuesta);
+        // }
+
+
+
+
+        // $this->despacharEstado($estado, $texto, $datos_cliente);
     }
 
     private function request($method, $endpoint, $body = []) {
@@ -315,43 +377,7 @@ class whats extends utilidades {
 
     
 
-    public function procesarWebhookWhatsApp($params = null) {
-        $data = isset($params["data"]) ? json_decode($params["data"], true) : false;
-
-        if (!isset($data['entry'][0]['changes'][0]['value']['messages'][0])) return;
-
-        $mensaje = $data['entry'][0]['changes'][0]['value']['messages'][0];
-        $mensaje_id = $mensaje['id'] ?? '';
-
-        if ($this->yaFueProcesado($mensaje_id)) return;
-
-        $nombre = $data['entry'][0]['changes'][0]['value']['contacts'][0]["profile"]["name"] ?? '';
-        $numero = $mensaje['from'];
-        $texto = strtolower(trim($mensaje['text']['body'] ?? ''));
-
-        $datos_cliente = $this->obtenerOInsertarCliente($numero, $nombre, $texto);
-        $status = $datos_cliente['status'];
-        $cliente_id = $datos_cliente['cliente_id'];
-        $espera_flujo = $datos_cliente['espera_flujo'];
-        $nombre = $datos_cliente['nombre_whats'];
-
-        if ($mensaje['type'] === 'interactive' && $mensaje['interactive']['type'] === 'nfm_reply') {
-            $this->guardarFlujo($datos_cliente, $mensaje);
-            $status = "Ejecutivo";
-        }
-
-        if ($texto == 'inicio') {
-            $this->mensajeBienvenida($datos_cliente);
-            return;
-        }
-
-        if ($texto == 'asesor') {
-            $this->mensajeAsesor($datos_cliente);
-            return;
-        }
-
-        $this->despacharEstado($status, $texto, $datos_cliente);
-    }
+    
 
     private function despacharEstado($status, $texto, $datos_cliente) {
         $handlers = [
@@ -793,22 +819,29 @@ class whats extends utilidades {
         return false;
     }
 
-    private function obtenerOInsertarCliente($numero, $nombre, $texto) {
-        $query = "SELECT status, cliente_id, espera_flujo,nombre_whats,numero_whats FROM master_posibles_clientes WHERE numero_whats = $numero";
+    private function obtenerOInsertarCliente($params = null) {
+
+        $numero = isset($params["numero"]) ? $this->cleanQuery($params["numero"]) : "";
+        $nombre = isset($params["nombre"]) ? $this->cleanQuery($params["nombre"]) : "";
+        $texto = isset($params["texto"]) ? $this->cleanQuery($params["texto"]) : "";
+        $negocio = isset($params["negocio"]) ? $this->cleanQuery($params["negocio"]) : [];
+
+        
+        $query = "SELECT activo, id_cliente, espera_flujo,nombre_whats,numero_whats,estado FROM negocio_clientes WHERE numero_whats = '".$numero."' AND id_negocio =".$negocio['id_negocio'];
         $res = $this->query($query);
 
         if ($res->num_rows > 0) {
             $data = $res->fetch_assoc();
-            $this->guardarRespuesta($data['cliente_id'], $texto, 2);
+            $this->guardarRespuesta($data['id_cliente'], $texto, 2);
             return $data;
         }
 
-        $status = "Bienvenida";
-        $this->query("INSERT INTO master_posibles_clientes (numero_whats, nombre_whats, status) VALUES ($numero, '$nombre', '$status')");
-        $cliente_id = $this->conexMySQL->insert_id;
-        $this->guardarRespuesta($cliente_id, $texto, 2);
+        $estado = "Inicio";
+        $this->query("INSERT INTO negocio_clientes (numero_whats, nombre_whats, estado,id_negocio) VALUES ('".$numero."', '".$nombre."', '".$estado."',".$negocio['id_negocio'].")");
+        $id_cliente = $this->conexMySQL->insert_id;
+        $this->guardarRespuesta($id_cliente, $texto, 2);
 
-        return ['status' => $status, 'cliente_id' => $cliente_id, 'espera_flujo' => null,"nombre_whats"=>$nombre,"numero_whats"=>$numero];
+        return ['estado' => $estado, 'id_cliente' => $id_cliente, 'espera_flujo' => null,"nombre_whats"=>$nombre,"numero_whats"=>$numero];
     }
 
 }
