@@ -44,7 +44,7 @@ class whats extends utilidades {
             "numero" => $numero,
             "nombre" => $nombre, 
             "texto" => $texto,
-            "negocio" =>$negocio
+            "negocio" =>$negocio[1]
         ]);
         $estado = $datos_cliente['estado'];
         $id_cliente = $datos_cliente['id_cliente'];

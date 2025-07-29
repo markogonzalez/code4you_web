@@ -44,6 +44,7 @@
 
             $condicion = " n.id_usuario = $id_usuario AND n.id_servicio = $id_servicio";
             if($numero_negocio!=""){
+                $numero_negocio = substr($numero_negocio, 3);
                 $condicion = " n.numero_negocio ='".$numero_negocio."'";
             }
 
