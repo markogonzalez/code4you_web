@@ -33,7 +33,6 @@ class whats extends utilidades {
         // Obtener número del negocio al que escribieron
         $numero_negocio = $data['entry'][0]['changes'][0]['value']['metadata']['display_phone_number'] ?? '';
         $negocio = $this->getNegocioUsuario(["numero_negocio"=>$numero_negocio]); // debes crear esta función
-        error_log(print_r($negocio,true));
         // Datos del cliente que escribió
         $nombre = $data['entry'][0]['changes'][0]['value']['contacts'][0]["profile"]["name"] ?? '';
         $numero = $mensaje['from'];
@@ -61,7 +60,7 @@ class whats extends utilidades {
                 "numero" => $numero,
                 "tipo" => "text",
                 "body" => $interpretacion[1]['respuesta'],
-                "id_whats" => $negocio["id_whats"]
+                "id_whats" => $negocio[1]["id_whats"]
             ]);
             if($mensaje[0]=="OK"){
                 $this->guardarRespuesta($datos_cliente['id_cliente'],$interpretacion[1]['respuesta'],1);
@@ -135,7 +134,7 @@ class whats extends utilidades {
     }
 
     public function enviarRespuesta($params = null) {
-
+        error_log(print_r($params,true));
         $destinatario = isset($params["destinatario"]) ? $this->normalizarNumeroWhatsapp($params["destinatario"]) : false;
         $mensaje     = isset($params["mensaje"]) ? $params["mensaje"] : "";
         $tipo        = isset($params["tipo"]) ? $params["tipo"] : "";
