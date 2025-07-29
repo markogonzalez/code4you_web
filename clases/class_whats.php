@@ -59,7 +59,7 @@ class whats extends utilidades {
             $mensaje = $this->enviarRespuesta([
                 "numero" => $numero,
                 "tipo" => "text",
-                "body" => $interpretacion[1]['respuesta'],
+                "mensaje" => $interpretacion[1]['respuesta'],
                 "id_whats" => $negocio[1]["id_whats"]
             ]);
             if($mensaje[0]=="OK"){
