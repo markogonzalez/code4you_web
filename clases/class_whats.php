@@ -38,22 +38,23 @@ class whats extends utilidades {
         $numero = $mensaje['from'];
         $texto = strtolower(trim($mensaje['text']['body'] ?? ''));
 
+        // 3. Consultar ChatGPT para interpretar el mensaje
+        $interpretacion = $this->openAI->interpretarConChatGPT(["mensaje" => $texto]);
+        if ($interpretacion[0]!="OK") return;
+
         // Buscar o crear cliente
         $datos_cliente = $this->obtenerOInsertarCliente([
             "numero" => $numero,
             "nombre" => $nombre, 
             "texto" => $texto,
-            "negocio" =>$negocio[1]
+            "negocio" =>$negocio[1],
+            "intencion" => $interpretacion[1]["intencion"]
         ]);
 
         if ($mensaje['type'] === 'interactive' && $mensaje['interactive']['type'] === 'nfm_reply') {
             $this->guardarFlujo($datos_cliente, $mensaje);
             $estado = "Ejecutivo";
         }
-
-        // 3. Consultar ChatGPT para interpretar el mensaje
-        $interpretacion = $this->openAI->interpretarConChatGPT(["mensaje" => $texto]);
-        if ($interpretacion[0]!="OK") return;
         
         $this->despacharEstado($interpretacion[1], $datos_cliente);
     }
@@ -814,10 +815,10 @@ class whats extends utilidades {
         $numero = isset($params["numero"]) ? $this->cleanQuery($params["numero"]) : "";
         $nombre = isset($params["nombre"]) ? $this->cleanQuery($params["nombre"]) : "";
         $texto = isset($params["texto"]) ? $this->cleanQuery($params["texto"]) : "";
-        $interpretacion = isset($params["interpretacion"]) ? $this->cleanQuery($params["interpretacion"]) : "";
+        $intencion = $params["intencion"];
         $negocio = $params["negocio"];
                 
-        $query = "SELECT activo, id_cliente, espera_flujo,nombre_whats,numero_whats,interpretacion FROM negocio_clientes WHERE numero_whats = '".$numero."' AND id_negocio =".$negocio['id_negocio'];
+        $query = "SELECT activo, id_cliente, espera_flujo,nombre_whats,numero_whats,intencion FROM negocio_clientes WHERE numero_whats = '".$numero."' AND id_negocio =".$negocio['id_negocio'];
         $res = $this->query($query);
 
         if ($res->num_rows > 0) {
@@ -827,12 +828,12 @@ class whats extends utilidades {
             return $data;
         }
 
-        $qry_insert = "INSERT INTO negocio_clientes (numero_whats, nombre_whats, interpretacion,id_negocio) VALUES ('".$numero."', '".$nombre."', '".$interpretacion."',".$negocio['id_negocio'].")";
+        $qry_insert = "INSERT INTO negocio_clientes (numero_whats, nombre_whats, intencion ,id_negocio) VALUES ('".$numero."', '".$nombre."', '".$intencion."',".$negocio['id_negocio'].")";
         $this->query($qry_insert);
         $id_cliente = $this->conexMySQL->insert_id;
         $this->guardarRespuesta($id_cliente, $texto, 2);
 
-        return ['interpretacion' => $interpretacion, 'id_cliente' => $id_cliente, 'espera_flujo' => null,"nombre_whats"=>$nombre,"numero_whats"=>$numero,"negocio"=>$negocio];
+        return ['intencion' => $intencion, 'id_cliente' => $id_cliente, 'espera_flujo' => null,"nombre_whats"=>$nombre,"numero_whats"=>$numero,"negocio"=>$negocio];
     }
 
 }
