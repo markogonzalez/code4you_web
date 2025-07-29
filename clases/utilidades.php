@@ -40,11 +40,11 @@
             $total_servicios = 0;
             $id_usuario = isset($params["id_usuario"]) ? $this->cleanQuery($params["id_usuario"]) : 0;
             $id_servicio = isset($params["id_servicio"]) ? $this->cleanQuery($params["id_servicio"]) : 0;
-            $id_whats = isset($params["id_whats"]) ? $this->cleanQuery($params["id_whats"]) : 0;
+            $numero_negocio = isset($params["numero_negocio"]) ? $this->cleanQuery($params["numero_negocio"]) : 0;
 
             $condicion = " n.id_usuario = $id_usuario AND n.id_servicio = $id_servicio";
-            if($id_whats!=""){
-                $condicion = " n.id_whats ='".$id_whats."'";
+            if($numero_negocio!=""){
+                $condicion = " n.numero_negocio ='".$numero_negocio."'";
             }
 
             $qry = "SELECT *,n.id_negocio as id_negocio_cliente,s.total_servicios,h.activo as horario_activo,n.id_servicio as id_servicio_negocio FROM cliente_negocio n 
