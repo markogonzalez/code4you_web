@@ -55,15 +55,15 @@ class whats extends utilidades {
         $interpretacion = $this->openAI->interpretarConChatGPT(["mensaje" => $texto]);
         if ($interpretacion[0]!="OK") return;
         
-        $this->despacharEstado($estado, $interpretacion[1], $datos_cliente);
+        $this->despacharEstado($interpretacion[1], $datos_cliente);
     }
 
-    private function despacharEstado($estado, $interpretacion, $datos_cliente) {
+    private function despacharEstado($interpretacion, $datos_cliente) {
         $handlers = [
             "saludo" => fn() => $this->handleSaludo(["datos_cliente"=>$datos_cliente,"interpretacion"=>$interpretacion[1]]),
         ];
 
-        ($handlers[$estado] ?? fn() => $this->mensajeDefault($datos_cliente))();
+        ($handlers[$interpretacion['intencion']] ?? fn() => $this->mensajeDefault($datos_cliente))();
     }
 
     private function handleSaludo($params = null) {
@@ -760,9 +760,13 @@ class whats extends utilidades {
         }
     }
 
-    public function actualizarEstado($cliente_id, $status,$espera_flujo) {
+    public function actualizarEstado($params = null) {
 
-        $qry_update = "UPDATE master_posibles_clientes SET status = '".$status."', espera_flujo = '".$espera_flujo."' WHERE cliente_id = ".$cliente_id;
+        $id_cliente = $params['id_cliente'];
+        $interpretacion = $params['inter$interpretacion'];
+        $espera_flujo = $params['espera_flujo'];
+
+        $qry_update = "UPDATE negocio_clientes SET interpretacion = '".$interpretacion."', espera_flujo = '".$espera_flujo."' WHERE id_cliente = ".$id_cliente;
 
         try {
             $this->query($qry_update);
@@ -810,9 +814,10 @@ class whats extends utilidades {
         $numero = isset($params["numero"]) ? $this->cleanQuery($params["numero"]) : "";
         $nombre = isset($params["nombre"]) ? $this->cleanQuery($params["nombre"]) : "";
         $texto = isset($params["texto"]) ? $this->cleanQuery($params["texto"]) : "";
+        $interpretacion = isset($params["interpretacion"]) ? $this->cleanQuery($params["interpretacion"]) : "";
         $negocio = $params["negocio"];
                 
-        $query = "SELECT activo, id_cliente, espera_flujo,nombre_whats,numero_whats,estado FROM negocio_clientes WHERE numero_whats = '".$numero."' AND id_negocio =".$negocio['id_negocio'];
+        $query = "SELECT activo, id_cliente, espera_flujo,nombre_whats,numero_whats,interpretacion FROM negocio_clientes WHERE numero_whats = '".$numero."' AND id_negocio =".$negocio['id_negocio'];
         $res = $this->query($query);
 
         if ($res->num_rows > 0) {
@@ -822,13 +827,12 @@ class whats extends utilidades {
             return $data;
         }
 
-        $estado = "Inicio";
-        $qry_insert = "INSERT INTO negocio_clientes (numero_whats, nombre_whats, estado,id_negocio) VALUES ('".$numero."', '".$nombre."', '".$estado."',".$negocio['id_negocio'].")";
+        $qry_insert = "INSERT INTO negocio_clientes (numero_whats, nombre_whats, interpretacion,id_negocio) VALUES ('".$numero."', '".$nombre."', '".$interpretacion."',".$negocio['id_negocio'].")";
         $this->query($qry_insert);
         $id_cliente = $this->conexMySQL->insert_id;
         $this->guardarRespuesta($id_cliente, $texto, 2);
 
-        return ['estado' => $estado, 'id_cliente' => $id_cliente, 'espera_flujo' => null,"nombre_whats"=>$nombre,"numero_whats"=>$numero,"negocio"=>$negocio];
+        return ['interpretacion' => $interpretacion, 'id_cliente' => $id_cliente, 'espera_flujo' => null,"nombre_whats"=>$nombre,"numero_whats"=>$numero,"negocio"=>$negocio];
     }
 
 }
