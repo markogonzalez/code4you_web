@@ -33,7 +33,7 @@ class whats extends utilidades {
         // Obtener número del negocio al que escribieron
         $numero_negocio = $data['entry'][0]['changes'][0]['value']['metadata']['display_phone_number'] ?? '';
         $negocio = $this->getNegocioUsuario(["numero_negocio"=>$numero_negocio]); // debes crear esta función
-
+        error_log(print_r($negocio,true));
         // Datos del cliente que escribió
         $nombre = $data['entry'][0]['changes'][0]['value']['contacts'][0]["profile"]["name"] ?? '';
         $numero = $mensaje['from'];
@@ -46,8 +46,6 @@ class whats extends utilidades {
             "texto" => $texto,
             "negocio" =>$negocio[1]
         ]);
-        $estado = $datos_cliente['estado'];
-        $id_cliente = $datos_cliente['id_cliente'];
 
         if ($mensaje['type'] === 'interactive' && $mensaje['interactive']['type'] === 'nfm_reply') {
             $this->guardarFlujo($datos_cliente, $mensaje);
@@ -148,7 +146,7 @@ class whats extends utilidades {
         $idioma_plantilla = isset($params["idioma_plantilla"]) ? $this->cleanQuery($params["idioma_plantilla"]) : "es_MX";
 
         $url = "https://graph.facebook.com/".WHATS_VERSION."/".$id_whats."/messages";
-
+        error_log($url);
         $data = [
             "messaging_product" => "whatsapp",
             "to" => $destinatario,
@@ -811,7 +809,8 @@ class whats extends utilidades {
     }
 
     private function obtenerOInsertarCliente($params = null) {
-
+error_log("params:");
+error_log(print_r($params,true));
         $numero = isset($params["numero"]) ? $this->cleanQuery($params["numero"]) : "";
         $nombre = isset($params["nombre"]) ? $this->cleanQuery($params["nombre"]) : "";
         $texto = isset($params["texto"]) ? $this->cleanQuery($params["texto"]) : "";
@@ -823,6 +822,7 @@ class whats extends utilidades {
         if ($res->num_rows > 0) {
             $data = $res->fetch_assoc();
             $this->guardarRespuesta($data['id_cliente'], $texto, 2);
+            $data["negocio"] = $negocio;
             return $data;
         }
 
@@ -832,7 +832,7 @@ class whats extends utilidades {
         $id_cliente = $this->conexMySQL->insert_id;
         $this->guardarRespuesta($id_cliente, $texto, 2);
 
-        return ['estado' => $estado, 'id_cliente' => $id_cliente, 'espera_flujo' => null,"nombre_whats"=>$nombre,"numero_whats"=>$numero];
+        return ['estado' => $estado, 'id_cliente' => $id_cliente, 'espera_flujo' => null,"nombre_whats"=>$nombre,"numero_whats"=>$numero,"negocio"=>$negocio];
     }
 
 }
