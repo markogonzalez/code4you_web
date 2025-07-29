@@ -56,29 +56,38 @@ class whats extends utilidades {
 
         // 3. Consultar ChatGPT para interpretar el mensaje
         $interpretacion = $this->openAI->interpretarConChatGPT(["mensaje" => $texto]);
-        error_log("Respuesta de la interpretacion de chatGPT en el webhook de Whatsapp");
-        error_log(print_r($interpretacion,true));
-        // if (!$interpretacion) return;
+        if ($interpretacion[0]!="OK") return;
 
-        // $json = json_decode($interpretacion, true);
-        // $intencion = $json['intencion'] ?? 'otra';
-        // $respuesta = $json['respuesta'] ?? '';
+        if($interpretacion[1]['intencion']=="saludo"){
+            $mensaje = $this->enviarRespuesta([
+                "numero" => $numero,
+                "tipo" => "text",
+                "body" => $interpretacion[1]['respuesta'],
+                "id_whats" => $negocio["id_whats"]
+            ]);
+            if($mensaje[0]=="OK"){
+                $this->guardarRespuesta($datos_cliente['id_cliente'],$interpretacion[1]['respuesta'],1);
+            }
+        }
 
-        // // 4. Si es conocer_servicios o no entendió nada, respondemos con servicios
-        // if ($intencion === 'conocer_servicios' || $intencion === 'otra') {
-        //     $this->enviarServiciosDisponibles($numero, $negocio['id_negocio']);
-        //     return;
-        // }
+        // $this->despacharEstado($estado, $interpretacion[1], $datos_cliente);
+    }
 
-        // // 5. Si hay respuesta del modelo, mándala
-        // if ($respuesta) {
-        //     $this->enviarMensajeWhatsApp($numero, $respuesta);
-        // }
+    private function despacharEstado($estado, $interpretacion, $datos_cliente) {
+        $handlers = [
+            "saludo" => fn() => $this->mensajeBienvenida($datos_cliente),
+            "SegmentoServicio" => fn() => $this->handleSegmentoServicio($texto, $datos_cliente),
+            // Flujo para las respuestas de opcion 1 "Desarrollo web"
+            "WebSegmento" => fn() => $this->handleWebSegmento($texto, $datos_cliente),
+            // Flujo para las respuestas de opcion 2 "Apps moviles"
+            "AppSegmento" => fn() => $this->handleAppSegmento($texto, $datos_cliente),
+            // Flujo para las respuestas de opcion 3 "Sistemas a la medida"
+            "SistemasSegmento" => fn() => $this->handleSistemasSegmento($texto, $datos_cliente),
+            "EsperaFlujo" => fn() => $this->handleEsperaFlujo($datos_cliente),
+            "Ejecutivo" => fn() => $this->handleEsperaEjecutivo($datos_cliente),
+        ];
 
-
-
-
-        // $this->despacharEstado($estado, $texto, $datos_cliente);
+        ($handlers[$status] ?? fn() => $this->mensajeDefault($datos_cliente))();
     }
 
     private function request($method, $endpoint, $body = []) {
@@ -376,22 +385,7 @@ class whats extends utilidades {
 
     
 
-    private function despacharEstado($status, $texto, $datos_cliente) {
-        $handlers = [
-            "Bienvenida" => fn() => $this->mensajeBienvenida($datos_cliente),
-            "SegmentoServicio" => fn() => $this->handleSegmentoServicio($texto, $datos_cliente),
-            // Flujo para las respuestas de opcion 1 "Desarrollo web"
-            "WebSegmento" => fn() => $this->handleWebSegmento($texto, $datos_cliente),
-            // Flujo para las respuestas de opcion 2 "Apps moviles"
-            "AppSegmento" => fn() => $this->handleAppSegmento($texto, $datos_cliente),
-            // Flujo para las respuestas de opcion 3 "Sistemas a la medida"
-            "SistemasSegmento" => fn() => $this->handleSistemasSegmento($texto, $datos_cliente),
-            "EsperaFlujo" => fn() => $this->handleEsperaFlujo($datos_cliente),
-            "Ejecutivo" => fn() => $this->handleEsperaEjecutivo($datos_cliente),
-        ];
-
-        ($handlers[$status] ?? fn() => $this->mensajeDefault($datos_cliente))();
-    }
+    
 
     private function handleSegmentoServicio($texto, $datos_cliente) {
         if ($texto === "1") {
@@ -821,9 +815,8 @@ class whats extends utilidades {
         $numero = isset($params["numero"]) ? $this->cleanQuery($params["numero"]) : "";
         $nombre = isset($params["nombre"]) ? $this->cleanQuery($params["nombre"]) : "";
         $texto = isset($params["texto"]) ? $this->cleanQuery($params["texto"]) : "";
-        $negocio = isset($params["negocio"]) ? $this->cleanQuery($params["negocio"]) : [];
-
-        
+        $negocio = $params["negocio"];
+                
         $query = "SELECT activo, id_cliente, espera_flujo,nombre_whats,numero_whats,estado FROM negocio_clientes WHERE numero_whats = '".$numero."' AND id_negocio =".$negocio['id_negocio'];
         $res = $this->query($query);
 
@@ -834,7 +827,8 @@ class whats extends utilidades {
         }
 
         $estado = "Inicio";
-        $this->query("INSERT INTO negocio_clientes (numero_whats, nombre_whats, estado,id_negocio) VALUES ('".$numero."', '".$nombre."', '".$estado."',".$negocio['id_negocio'].")");
+        $qry_insert = "INSERT INTO negocio_clientes (numero_whats, nombre_whats, estado,id_negocio) VALUES ('".$numero."', '".$nombre."', '".$estado."',".$negocio['id_negocio'].")";
+        $this->query($qry_insert);
         $id_cliente = $this->conexMySQL->insert_id;
         $this->guardarRespuesta($id_cliente, $texto, 2);
 

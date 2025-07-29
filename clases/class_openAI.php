@@ -16,7 +16,6 @@ class openAI extends utilidades {
            'Authorization' => 'Bearer ' .KEY_GPT,
             'Content-Type'  => 'application/json'
         ];
-        
     }
 
     private function request($method, $endpoint, $body = []) {
@@ -65,9 +64,8 @@ class openAI extends utilidades {
     }
 
     public function interpretarConChatGPT($params = null) {
-        
-        $mensaje = isset($params["mensaje"]) ? $this->cleanQuery($params["mensaje"]) : "Quiero cortarme el paquete amazonas con ale mañana a las 6";
-
+    
+        $mensaje = isset($params["mensaje"]) ? $this->cleanQuery($params["mensaje"]) : "";
         $promptBase = file_get_contents((__DIR__ . '/../prompts/barberia.txt'));
         $prompt = str_replace("{{texto_usuario}}", $mensaje, $promptBase);
 
@@ -87,8 +85,31 @@ class openAI extends utilidades {
             ],
             "temperature" => 0.3
         ]);
-        return[$codigoApi,$response];
+        
+        if($codigoApi!="OK"){
+            $codigoApi="ERR";
+            $interpretacion = "Error al interpretar mensaje del usuario";
+        }
 
-       
+        $content = $response['choices'][0]['message']['content'] ?? '';
+
+        $content = trim($content);
+
+        // Eliminar los backticks y el posible prefijo ```json
+        if ($this->startsWith($content, '```json')) {
+            $content = substr($content, 7);
+        }elseif($this->startsWith($content, '```')) {
+            $content = substr($content, 3);
+        }
+
+        $content = rtrim($content, '`'); // Eliminar los backticks del final
+
+        $interpretacion = json_decode($content, true);
+        return[$codigoApi,$interpretacion];
+
+    }
+
+    private function startsWith($haystack, $needle) {
+        return substr($haystack, 0, strlen($needle)) === $needle;
     }
 }
