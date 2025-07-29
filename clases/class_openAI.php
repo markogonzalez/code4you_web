@@ -13,7 +13,7 @@ class openAI extends utilidades {
 
         $this->client = new \GuzzleHttp\Client();
         $this->headers = [
-           'Authorization' => 'Bearer ' .OPENAI_TEST_KEY,
+           'Authorization' => 'Bearer ' .KEY_GPT,
             'Content-Type'  => 'application/json'
         ];
         
