@@ -54,37 +54,34 @@ class whats extends utilidades {
         // 3. Consultar ChatGPT para interpretar el mensaje
         $interpretacion = $this->openAI->interpretarConChatGPT(["mensaje" => $texto]);
         if ($interpretacion[0]!="OK") return;
-
-        if($interpretacion[1]['intencion']=="saludo"){
-            $mensaje = $this->enviarRespuesta([
-                "numero" => $numero,
-                "tipo" => "text",
-                "mensaje" => $interpretacion[1]['respuesta'],
-                "id_whats" => $negocio[1]["id_whats"]
-            ]);
-            if($mensaje[0]=="OK"){
-                $this->guardarRespuesta($datos_cliente['id_cliente'],$interpretacion[1]['respuesta'],1);
-            }
-        }
-
-        // $this->despacharEstado($estado, $interpretacion[1], $datos_cliente);
+        
+        $this->despacharEstado($estado, $interpretacion[1], $datos_cliente);
     }
 
     private function despacharEstado($estado, $interpretacion, $datos_cliente) {
         $handlers = [
-            "saludo" => fn() => $this->mensajeBienvenida($datos_cliente),
-            "SegmentoServicio" => fn() => $this->handleSegmentoServicio($texto, $datos_cliente),
-            // Flujo para las respuestas de opcion 1 "Desarrollo web"
-            "WebSegmento" => fn() => $this->handleWebSegmento($texto, $datos_cliente),
-            // Flujo para las respuestas de opcion 2 "Apps moviles"
-            "AppSegmento" => fn() => $this->handleAppSegmento($texto, $datos_cliente),
-            // Flujo para las respuestas de opcion 3 "Sistemas a la medida"
-            "SistemasSegmento" => fn() => $this->handleSistemasSegmento($texto, $datos_cliente),
-            "EsperaFlujo" => fn() => $this->handleEsperaFlujo($datos_cliente),
-            "Ejecutivo" => fn() => $this->handleEsperaEjecutivo($datos_cliente),
+            "saludo" => fn() => $this->handleSaludo(["datos_cliente"=>$datos_cliente,"interpretacion"=>$interpretacion[1]]),
         ];
 
-        ($handlers[$status] ?? fn() => $this->mensajeDefault($datos_cliente))();
+        ($handlers[$estado] ?? fn() => $this->mensajeDefault($datos_cliente))();
+    }
+
+    private function handleSaludo($params = null) {
+
+        $datos_cliente = $params['datos_cliente'];
+        $interpretacion = $params['interpretacion'];
+
+        if($interpretacion[1]['intencion']=="saludo"){
+            $mensaje = $this->enviarRespuesta([
+                "destinatario" => $datos_cliente['numero_whats'],
+                "tipo" => "text",
+                "mensaje" => $interpretacion['respuesta'],
+                "id_whats" => $datos_cliente['negocio']["id_whats"]
+            ]);
+            if($mensaje[0]=="OK"){
+                $this->guardarRespuesta($datos_cliente['id_cliente'],$interpretacion['respuesta'],1);
+            }
+        }
     }
 
     private function request($method, $endpoint, $body = []) {
@@ -218,6 +215,7 @@ class whats extends utilidades {
         }
 
         // Enviar la petición con Guzzle
+        error_log(print_r($data,true));
         list($codigoApi,$response) = $this->request("POST", $url, $data);
         return [$codigoApi,$response];
     }
@@ -808,8 +806,7 @@ class whats extends utilidades {
     }
 
     private function obtenerOInsertarCliente($params = null) {
-error_log("params:");
-error_log(print_r($params,true));
+
         $numero = isset($params["numero"]) ? $this->cleanQuery($params["numero"]) : "";
         $nombre = isset($params["nombre"]) ? $this->cleanQuery($params["nombre"]) : "";
         $texto = isset($params["texto"]) ? $this->cleanQuery($params["texto"]) : "";
