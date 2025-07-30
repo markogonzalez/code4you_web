@@ -310,6 +310,21 @@
             }
         }
 
+        public function actualizarIntencionWhats($params = null) {
+
+            $id_cliente = $params['id_cliente'];
+            $intencion = $params['intencion'];
+            $espera_flujo = $params['espera_flujo'];
+
+            $qry_update = "UPDATE negocio_clientes SET intencion = '".$intencion."', espera_flujo = '".$espera_flujo."' WHERE id_cliente = ".$id_cliente;
+
+            try {
+                $this->query($qry_update);
+            } catch (Exception $e) {
+                error_log("Error al actualizar el estado: " . $e->getMessage());
+            }
+        }
+
         public function normalizarNumeroWhatsapp($numero_raw) {
         
             $numero = preg_replace('/[^0-9]/', '', $numero_raw);
