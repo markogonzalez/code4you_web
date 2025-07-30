@@ -57,14 +57,22 @@ class whats extends utilidades {
         }
         
         $tipo_bot = $negocio[1]['tipo_bot']; // ej. 'barberia'
-        $archivo_clase = __DIR__ . "/bots/class_$tipo_bot.php";
+        $clase_bot = "bot_" . $tipo_bot;     // 'bot_barberia'
+        $archivo_clase = __DIR__ . "/bots/class_$clase_bot.php";
+        error_log("Incluire bot en $archivo_clase");
 
         if (file_exists($archivo_clase)) {
             include_once($archivo_clase);
-            $bot = new $tipo_bot($datos_cliente, $interpretacion[1]); // puedes pasarle el contexto necesario
-            $bot->despachar(); // delegas la lógica
+
+            if (class_exists($clase_bot)) {
+                $bot = new $clase_bot($datos_cliente, $interpretacion[1]);
+                error_log("Instancia creada: " . get_class($bot));
+                $bot->despachar();
+            } else {
+                error_log("Clase no encontrada: $clase_bot");
+            }
         } else {
-            error_log("No se encontró la clase de bot: $clase_bot");
+            error_log("Archivo de clase no encontrado: $archivo_clase");
         }
         
     }
