@@ -56,7 +56,17 @@ class whats extends utilidades {
             $estado = "Ejecutivo";
         }
         
-        $this->despacharEstado($interpretacion[1], $datos_cliente);
+        $tipo_bot = $negocio[1]['tipo_bot']; // ej. 'barberia'
+        $archivo_clase = __DIR__ . "/bots/class_$tipo_bot.php";
+
+        if (file_exists($archivo_clase)) {
+            include_once($archivo_clase);
+            $bot = new $tipo_bot($datos_cliente, $interpretacion[1]); // puedes pasarle el contexto necesario
+            $bot->despachar(); // delegas la lógica
+        } else {
+            error_log("No se encontró la clase de bot: $clase_bot");
+        }
+        
     }
 
     private function despacharEstado($interpretacion, $datos_cliente) {
@@ -67,23 +77,6 @@ class whats extends utilidades {
         ($handlers[$interpretacion['intencion']] ?? fn() => $this->mensajeDefault($datos_cliente))();
     }
 
-    private function handleSaludo($params = null) {
-
-        $datos_cliente = $params['datos_cliente'];
-        $interpretacion = $params['interpretacion'];
-
-        if($interpretacion[1]['intencion']=="saludo"){
-            $mensaje = $this->enviarRespuesta([
-                "destinatario" => $datos_cliente['numero_whats'],
-                "tipo" => "text",
-                "mensaje" => $interpretacion['respuesta'],
-                "id_whats" => $datos_cliente['negocio']["id_whats"]
-            ]);
-            if($mensaje[0]=="OK"){
-                $this->guardarRespuesta($datos_cliente['id_cliente'],$interpretacion['respuesta'],1);
-            }
-        }
-    }
 
     private function request($method, $endpoint, $body = []) {
         $codigo = "OK";
@@ -132,7 +125,7 @@ class whats extends utilidades {
     }
 
     public function enviarRespuesta($params = null) {
-        error_log(print_r($params,true));
+
         $destinatario = isset($params["destinatario"]) ? $this->normalizarNumeroWhatsapp($params["destinatario"]) : false;
         $mensaje     = isset($params["mensaje"]) ? $params["mensaje"] : "";
         $tipo        = isset($params["tipo"]) ? $params["tipo"] : "";
@@ -143,7 +136,6 @@ class whats extends utilidades {
         $idioma_plantilla = isset($params["idioma_plantilla"]) ? $this->cleanQuery($params["idioma_plantilla"]) : "es_MX";
 
         $url = "https://graph.facebook.com/".WHATS_VERSION."/".$id_whats."/messages";
-        error_log($url);
         $data = [
             "messaging_product" => "whatsapp",
             "to" => $destinatario,
@@ -776,31 +768,6 @@ class whats extends utilidades {
         }
     }
 
-    public function guardarRespuesta($cliente_id, $texto, $tipo_mensaje) {
-        $qry_insert = "INSERT INTO conversaciones_whats (mensaje, cliente_id,tipo_mensaje) VALUES ('".$texto."', ".$cliente_id.", ".$tipo_mensaje.")";
-        try {
-            $this->query($qry_insert);
-        } catch (Exception $e) {
-            error_log("Error al guardar la respuesta: " . $e->getMessage());
-        }
-    }
-    
-    public function normalizarNumeroWhatsapp($numero_raw) {
-        
-        $numero = preg_replace('/[^0-9]/', '', $numero_raw);
-        if (strpos($numero, '52') === 0 && strlen($numero) > 12) {
-            $numero = substr($numero, 0, 2) . substr($numero, 3);
-        }
-        if (strlen($numero) === 10) {
-            $numero = "521" . $numero;
-        }
-        if (strlen($numero) < 12 || strlen($numero) > 13) {
-            error_log("Número inválido para WhatsApp API: " . $numero_raw);
-            return false;
-        }
-        return $numero;
-    }
-
     private function yaFueProcesado($mensaje_id) {
         $query = "SELECT 1 FROM mensajes_procesados WHERE mensaje_id = '$mensaje_id'";
         $res = $this->query($query);
@@ -823,6 +790,11 @@ class whats extends utilidades {
 
         if ($res->num_rows > 0) {
             $data = $res->fetch_assoc();
+            $this->actualizarEstado([
+                "id_cliente" => $data['id_cliente'],
+                "intencion" => $intencion,
+                "espera_flujo" => ""
+            ]);
             $this->guardarRespuesta($data['id_cliente'], $texto, 2);
             $data["negocio"] = $negocio;
             return $data;

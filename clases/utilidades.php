@@ -48,10 +48,19 @@
                 $condicion = " n.numero_negocio ='".$numero_negocio."'";
             }
 
-            $qry = "SELECT *,n.id_negocio as id_negocio_cliente,s.total_servicios,h.activo as horario_activo,n.id_servicio as id_servicio_negocio FROM cliente_negocio n 
-                    LEFT JOIN negocio_horarios h ON n.id_negocio = h.id_negocio 
-                    LEFT JOIN (SELECT COUNT(*) as total_servicios,id_negocio FROM negocio_servicios ) as s ON n.id_negocio = s.id_negocio
-                    WHERE ".$condicion." AND n.activo = 1";
+            $qry = "SELECT *,
+                n.id_negocio as id_negocio_cliente,
+                s.total_servicios,
+                h.activo as horario_activo,
+                n.id_servicio as id_servicio_negocio,
+                CASE 
+                    WHEN n.id_servicio = 1 THEN 'barberia'
+                    ELSE 'code4you'
+                END as 'tipo_bot'
+                FROM cliente_negocio n 
+                LEFT JOIN negocio_horarios h ON n.id_negocio = h.id_negocio 
+                LEFT JOIN (SELECT COUNT(*) as total_servicios,id_negocio,servicio FROM negocio_servicios ) as s ON n.id_negocio = s.id_negocio
+                WHERE ".$condicion." AND n.activo = 1";
             
             $res = $this->query($qry);
 
@@ -75,7 +84,8 @@
                         "id_negocio" => $row['id_negocio_cliente'],
                         "id_whats" => $row['id_whats'],
                         "total_servicios" => $row['total_servicios'],
-                        "id_servicio" => $row['id_servicio_negocio']
+                        "id_servicio" => $row['id_servicio_negocio'],
+                        "tipo_bot" => $row['tipo_bot']
                     ];
                     if ($row['dia'] != null) {
                         $horarios[$row['dia']] = [
@@ -289,6 +299,31 @@
             }
 
             return $contrasena;
+        }
+
+        public function guardarRespuestaWhats($cliente_id, $texto, $tipo_mensaje) {
+            $qry_insert = "INSERT INTO conversaciones_whats (mensaje, cliente_id,tipo_mensaje) VALUES ('".$texto."', ".$cliente_id.", ".$tipo_mensaje.")";
+            try {
+                $this->query($qry_insert);
+            } catch (Exception $e) {
+                error_log("Error al guardar la respuesta: " . $e->getMessage());
+            }
+        }
+
+        public function normalizarNumeroWhatsapp($numero_raw) {
+        
+            $numero = preg_replace('/[^0-9]/', '', $numero_raw);
+            if (strpos($numero, '52') === 0 && strlen($numero) > 12) {
+                $numero = substr($numero, 0, 2) . substr($numero, 3);
+            }
+            if (strlen($numero) === 10) {
+                $numero = "521" . $numero;
+            }
+            if (strlen($numero) < 12 || strlen($numero) > 13) {
+                error_log("Número inválido para WhatsApp API: " . $numero_raw);
+                return false;
+            }
+            return $numero;
         }
 
 	}
