@@ -1,9 +1,8 @@
 <?php 
 
     include_once __DIR__ . '/../clases/class_whats.php';
-    include_once __DIR__ . '/../utilidades.php';
 
-    class bot_barberia extends utilidades{
+    class bot_barberia{
 
         private $whats;
         private $cliente;
