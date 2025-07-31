@@ -9,7 +9,6 @@
         private $interpretacion;
         
         public function __construct($cliente,$interpretacion) {
-            parent::__construct();
             @$this->whats = new whats();
             $this->cliente = $cliente;
             $this->interpretacion = $interpretacion;
