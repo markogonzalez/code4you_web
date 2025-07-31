@@ -15,7 +15,7 @@
         } //function __construct
 
         public function despachar() {
-            $intencion = $this->interpretacion['intencion'] ?? 'otra';
+            $intencion = $this->interpretacion['intencion'];
 
             $handlers = [
                 'saludo' => fn() => $this->intencionSaludo(),
@@ -29,7 +29,7 @@
             $datos_cliente = $params['datos_cliente'];
             $interpretacion = $params['interpretacion'];
 
-            if($interpretacion[1]['intencion']=="saludo"){
+            if($interpretacion['intencion']=="saludo"){
                 $mensaje = $this->whats->enviarRespuesta([
                     "destinatario" => $datos_cliente['numero_whats'],
                     "tipo" => "text",
