@@ -5,12 +5,12 @@
     class bot_barberia{
 
         private $whats;
-        private $cliente;
+        private $datos_cliente;
         private $interpretacion;
         
-        public function __construct($cliente,$interpretacion) {
+        public function __construct($datos_cliente,$interpretacion) {
             @$this->whats = new whats();
-            $this->cliente = $cliente;
+            $this->datos_cliente = $datos_cliente;
             $this->interpretacion = $interpretacion;
         } //function __construct
 
@@ -26,18 +26,15 @@
 
         private function intencionSaludo($params = null) {
 
-            $datos_cliente = $params['datos_cliente'];
-            $interpretacion = $params['interpretacion'];
-
-            if($interpretacion['intencion']=="saludo"){
+            if($this->interpretacion['intencion']=="saludo"){
                 $mensaje = $this->whats->enviarRespuesta([
-                    "destinatario" => $datos_cliente['numero_whats'],
+                    "destinatario" => $this->datos_cliente['numero_whats'],
                     "tipo" => "text",
-                    "mensaje" => $interpretacion['respuesta'],
-                    "id_whats" => $datos_cliente['negocio']["id_whats"]
+                    "mensaje" => $this->interpretacion['respuesta'],
+                    "id_whats" => $this->datos_cliente['negocio']["id_whats"]
                 ]);
                 if($mensaje[0]=="OK"){
-                    $this->guardarRespuestaWhats($datos_cliente['id_cliente'],$interpretacion['respuesta'],1);
+                    $this->guardarRespuestaWhats($this->datos_cliente['id_cliente'],$this->interpretacion['respuesta'],1);
                 }
             }
         }

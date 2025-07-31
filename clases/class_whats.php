@@ -74,15 +74,6 @@ class whats extends utilidades {
         
     }
 
-    private function despacharEstado($interpretacion, $datos_cliente) {
-        $handlers = [
-            "saludo" => fn() => $this->handleSaludo(["datos_cliente"=>$datos_cliente,"interpretacion"=>$interpretacion[1]]),
-        ];
-
-        ($handlers[$interpretacion['intencion']] ?? fn() => $this->mensajeDefault($datos_cliente))();
-    }
-
-
     private function request($method, $endpoint, $body = []) {
         $codigo = "OK";
         $data = [];
