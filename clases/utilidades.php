@@ -34,83 +34,95 @@
             
         }
 
-        public function getNegocioUsuario($params = null) {
+        public function getNegocio($params = null) {
             
-            $negocio = null;
-            $total_servicios = 0;
             $id_usuario = isset($params["id_usuario"]) ? $this->cleanQuery($params["id_usuario"]) : 0;
             $id_servicio = isset($params["id_servicio"]) ? $this->cleanQuery($params["id_servicio"]) : 0;
             $numero_negocio = isset($params["numero_negocio"]) ? $this->cleanQuery($params["numero_negocio"]) : 0;
+            $datos_negocio = null;
 
-            $condicion = " n.id_usuario = $id_usuario AND n.id_servicio = $id_servicio";
-            if($numero_negocio!=""){
-                $numero_negocio = substr($numero_negocio, 3);
-                $condicion = " n.numero_negocio ='".$numero_negocio."'";
-            }
-
-            $qry = "SELECT *,
-                n.id_negocio as id_negocio_cliente,
-                s.total_servicios,
-                h.activo as horario_activo,
-                n.id_servicio as id_servicio_negocio,
-                CASE 
-                    WHEN n.id_servicio = 1 THEN 'barberia'
-                    ELSE 'code4you'
-                END as 'tipo_bot'
-                FROM cliente_negocio n 
-                LEFT JOIN negocio_horarios h ON n.id_negocio = h.id_negocio 
-                LEFT JOIN (SELECT COUNT(*) as total_servicios,id_negocio,servicio FROM negocio_servicios ) as s ON n.id_negocio = s.id_negocio
-                WHERE ".$condicion." AND n.activo = 1";
-            
-            $res = $this->query($qry);
-
-            if ($res->num_rows > 0) {
-                $horarios = [];
-                $negocioBase = null;
-
-                while ($row = $res->fetch_assoc()) {
-
-                    $negocioBase = [
-                        "address" => $row['address'],
-                        "description" => $row['description'],
-                        "email" => $row['email'],
-                        "fecha_creacion" => $row['fecha_creacion'],
-                        "foto_perfil" => $row['foto_perfil'],
-                        "nombre_negocio" => $row['nombre_negocio'],
-                        "numero_negocio" => $row['numero_negocio'],
-                        "status" => $row['status'],
-                        "website" => $row['website'],
-                        "ultima_verificacion" => $row['ultima_verificacion'],
-                        "id_negocio" => $row['id_negocio_cliente'],
-                        "id_whats" => $row['id_whats'],
-                        "total_servicios" => $row['total_servicios'],
-                        "id_servicio" => $row['id_servicio_negocio'],
-                        "tipo_bot" => $row['tipo_bot']
-                    ];
-                    if ($row['dia'] != null) {
-                        $horarios[$row['dia']] = [
-                            'dia' => $row['dia'],
-                            'inicio' => $row['hora_inicio'],
-                            'fin' => $row['hora_fin'],
-                            'activo' => $row['horario_activo']
+            if($id_usuario > 0 && $id_servicio > 0){
+    
+                $qry = "SELECT *,
+                    n.id_negocio as id_negocio_cliente,
+                    IFNULL(s.total_servicios,0) as total_servicios,
+                    h.activo as horario_activo,
+                    n.id_servicio as id_servicio_negocio,
+                    CASE 
+                        WHEN n.id_servicio = 1 THEN 'barberia'
+                        ELSE 'code4you'
+                    END as 'tipo_bot'
+                    FROM cliente_negocio n 
+                    LEFT JOIN negocio_horarios h ON n.id_negocio = h.id_negocio 
+                    LEFT JOIN (SELECT COUNT(*) as total_servicios,id_negocio,servicio FROM negocio_servicios ) as s ON n.id_negocio = s.id_negocio
+                    WHERE n.id_usuario = $id_usuario AND n.id_servicio = $id_servicio AND n.activo = 1";
+                $res = $this->query($qry);
+    
+                if ($res->num_rows > 0) {
+                    $horarios = [];
+                    $negocioBase = null;
+    
+                    while ($row = $res->fetch_assoc()) {
+    
+                        $negocioBase = [
+                            "id_negocio" => (int)$row['id_negocio_cliente'],
+                            "nombre_negocio" => $row['nombre_negocio'],
+                            "numero_negocio" => $row['numero_negocio'],
+                            "address" => $row['address'],
+                            "description" => $row['description'],
+                            "email" => $row['email'],
+                            "website" => $row['website'],
+                            "tipo_bot" => $row['tipo_bot'],
+                            "id_servicio" => (int)$row['id_servicio_negocio'],
+                            "id_whats" => $row['id_whats'],
+                            "status" => (int)$row['status'],
+                            "description" => $row['description'],
+                            "website" => $row['website'],
+                            "email" => $row['email'],
+                            "foto_perfil" => $row['foto_perfil'],
+                            "fecha_creacion" => $row['fecha_creacion'],
+                            "ultima_verificacion" => $row['ultima_verificacion'],
+                            "fecha_actualizacion" => $row['fecha_actualizacion'],
+                            "total_servicios" => (int)$row['total_servicios'],
                         ];
+                        if ($row['dia'] != null) {
+                            $horarios[$row['dia']] = [
+                                'dia' => $row['dia'],
+                                'inicio' => $row['hora_inicio'],
+                                'fin' => $row['hora_fin'],
+                                'activo' => $row['horario_activo']
+                            ];
+                        }
+                        
                     }
                     
+                    
+                    $tsUltimo = strtotime($negocioBase['ultima_verificacion']);
+                    $tsDisponible = $tsUltimo + 600;
+                    $ahora = time();
+                    $faltan = max(0, $tsDisponible - $ahora);
+    
+                    $negocioBase['falta_reenviar'] = $faltan;
+                    $negocioBase['horarios'] = $horarios;
+    
+                    return ["OK", $negocioBase];
                 }
-                
-                
-                $tsUltimo = strtotime($negocioBase['ultima_verificacion']);
-                $tsDisponible = $tsUltimo + 600;
-                $ahora = time();
-                $faltan = max(0, $tsDisponible - $ahora);
+    
+                return ["OK", null];
+            }else{
 
-                $negocioBase['falta_reenviar'] = $faltan;
-                $negocioBase['horarios'] = $horarios;
-
-                return ["OK", $negocioBase];
+                // Ruta al archivo JSON cacheado
+                $archivo_json = __DIR__ . "/../configuracion_negocio/negocio_{$numero_negocio}.json";
+                if (file_exists($archivo_json)) {
+                    $contenido = file_get_contents($archivo_json);
+                    $datos_negocio = json_decode($contenido, true);
+                    if (!is_array($datos_negocio)) {
+                        return ["ERR", "JSON inválido o corrupto"];
+                    }
+                }
+                return ["OK", $datos_negocio];
             }
 
-            return ["OK", null];
         }
 
         public function openpay($params = null){

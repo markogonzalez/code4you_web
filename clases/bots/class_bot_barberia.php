@@ -19,6 +19,12 @@
 
             $handlers = [
                 'saludo' => fn() => $this->intencionSaludo(),
+                'agendar_cita' => fn() => $this->intencionAgendarCita(),
+                'conocer_servicios' => fn() => $this->intencionServicios(),
+                'comprar_producto' => fn() => $this->intencionCompra(),
+                'cancelar_cita' => fn() => $this->intencionCancelar(),
+                'realizar_pago' => fn() => $this->intencionPago(),
+                'otra' => fn() => $this->intencionGenerica()
             ];
 
             ($handlers[$intencion] ?? $handlers['otra'])();
@@ -37,6 +43,71 @@
                     $this->guardarRespuestaWhats($this->datos_cliente['id_cliente'],$this->interpretacion['respuesta'],1);
                 }
             }
+        }
+
+        private function intencionAgendarCita() {
+            $vars = $this->interpretacion['variables'];
+            $faltantes = [];
+
+            // Validamos solo los esenciales
+            if (empty($vars['servicio'])) $faltantes[] = "servicio";
+            if (empty($vars['fecha'])) $faltantes[] = "fecha";
+            if (empty($vars['hora'])) $faltantes[] = "hora";
+
+            if (count($faltantes)) {
+                $mensaje = "Para agendar tu cita necesito: " . implode(", ", $faltantes) . ". ¿Podrías indicarlo?";
+                $this->whats->enviarRespuesta([
+                    "destinatario" => $this->datos_cliente['numero_whats'],
+                    "tipo" => "text",
+                    "mensaje" => $mensaje,
+                    "id_whats" => $this->datos_cliente['negocio']["id_whats"]
+                ]);
+                return;
+            }
+
+            // Si NO especificó barbero, preguntamos si desea uno o le asignamos
+            if (empty($vars['barbero'])) {
+                $mensaje = "¿Tienes algún barbero de preferencia o quieres que asignemos al primero disponible en ese horario?";
+                $this->guardarEstadoConversacion([
+                    "cliente_id" => $this->datos_cliente['id_cliente'],
+                    "espera" => "barbero_preferencia",
+                    "contexto" => json_encode($vars)
+                ]);
+                $this->whats->enviarRespuesta([
+                    "destinatario" => $this->datos_cliente['numero_whats'],
+                    "tipo" => "text",
+                    "mensaje" => $mensaje,
+                    "id_whats" => $this->datos_cliente['negocio']["id_whats"]
+                ]);
+                return;
+            }
+
+            // Si todo está listo, validar disponibilidad
+            list($disponible, $motivo) = $this->validarDisponibilidad([
+                "barbero" => $vars['barbero'],
+                "fecha" => $vars['fecha'],
+                "hora" => $vars['hora'],
+                "duracion" => 60
+            ]);
+
+            if (!$disponible) {
+                $this->whats->enviarRespuesta([
+                    "destinatario" => $this->datos_cliente['numero_whats'],
+                    "tipo" => "text",
+                    "mensaje" => "No hay disponibilidad en ese horario. ¿Deseas que te proponga otro?",
+                    "id_whats" => $this->datos_cliente['negocio']["id_whats"]
+                ]);
+                return;
+            }
+
+            // Confirmación
+            $resumen = "Te agendaría para *{$vars['servicio']}* el *{$vars['fecha']}* a las *{$vars['hora']}* con *{$vars['barbero']}*. ¿Deseas confirmar?";
+            $this->whats->enviarRespuesta([
+                "destinatario" => $this->datos_cliente['numero_whats'],
+                "tipo" => "text",
+                "mensaje" => $resumen,
+                "id_whats" => $this->datos_cliente['negocio']["id_whats"]
+            ]);
         }
 
         public function actualizarPerfil($params = null) {

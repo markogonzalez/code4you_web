@@ -16,6 +16,98 @@
             
         } //function __construct
 
+        public function setConfiguracionNegocio($params = null){
+            $negocioConfiguracion = null;
+            $codigo = "OK";
+            $id_negocio    = $this->cleanQuery($params["id_negocio"] ?? 0);
+            // 1. Info general del negocio
+            $sqlNegocio = "SELECT 
+                            cn.*,
+                            CASE 
+                                WHEN cn.id_servicio = 1 THEN 'barberia'
+                                ELSE 'code4you'
+                            END AS tipo_bot
+                        FROM cliente_negocio cn
+                        WHERE cn.id_negocio = $id_negocio";
+
+            $resNegocio = $this->query($sqlNegocio);
+            if (!$resNegocio || $resNegocio->num_rows == 0) return false;
+
+            $negocio = $resNegocio->fetch_assoc();
+
+            // 2. Servicios
+            $sqlServicios = "SELECT id_servicio, servicio AS nombre, duracion ,precio
+                            FROM negocio_servicios 
+                            WHERE id_negocio = $id_negocio AND activo = 1";
+            $resServicios = $this->query($sqlServicios);
+            $servicios = [];
+            while ($row = $resServicios->fetch_assoc()) {
+                $servicios[] = $row;
+            }
+
+            // 3. Horarios
+            $sqlHorarios = "SELECT dia, hora_inicio AS inicio, hora_fin AS fin, activo 
+                            FROM negocio_horarios 
+                            WHERE id_negocio = $id_negocio";
+            $resHorarios = $this->query($sqlHorarios);
+            $horarios = [];
+            while ($row = $resHorarios->fetch_assoc()) {
+                $horarios[$row['dia']] = [
+                    "dia" => $row['dia'],
+                    "inicio" => $row['inicio'],
+                    "fin" => $row['fin'],
+                    "activo" => (int)$row['activo']
+                ];
+            }
+
+            // 4. Trabajadores
+            $sqlTrabajadores = "SELECT ct.id_usuario_trabajador AS id_trabajador, mu.nombre
+                                FROM cliente_trabajador ct
+                                LEFT JOIN master_usuarios mu ON ct.id_usuario_trabajador = mu.id_usuario
+                                WHERE ct.id_negocio = $id_negocio";
+            $resTrabajadores = $this->query($sqlTrabajadores);
+            $trabajadores = [];
+            while ($row = $resTrabajadores->fetch_assoc()) {
+                $trabajadores[] = $row;
+            }
+
+            // 5. Estructura final
+            $json_final = [
+                "id_negocio" => (int)$negocio['id_negocio'],
+                "nombre_negocio" => $negocio['nombre_negocio'],
+                "numero_negocio" => $negocio['numero_negocio'],
+                "address" => $negocio['address'],
+                "description" => $negocio['description'],
+                "email" => $negocio['email'],
+                "website" => $negocio['website'],
+                "tipo_bot" => $negocio['tipo_bot'],
+                "id_servicio" => (int)$negocio['id_servicio'],
+                "id_whats" => $negocio['id_whats'],
+                "status" => (int)$negocio['status'],
+                "description" => $negocio['description'],
+                "website" => $negocio['website'],
+                "email" => $negocio['email'],
+                "foto_perfil" => $negocio['foto_perfil'],
+                "fecha_creacion" => $negocio['fecha_creacion'],
+                "fecha_actualizacion" => $negocio['fecha_actualizacion'],
+                "servicios" => $servicios,
+                "horarios" => $horarios,
+                "trabajadores" => $trabajadores
+            ];
+
+            // 6. Guardar archivo JSON
+            $ruta = __DIR__ . '/../configuracion_negocio/negocio_'.$negocio['numero_negocio'].'.json';
+            file_put_contents($ruta, json_encode($json_final, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+            if(file_exists($ruta)){
+                $negocioConfiguracion = $this->getNegocio(["numero_negocio"=>$negocio['numero_negocio']]);
+            }else{
+                $codigo = "ERR";
+                $negocioConfiguracion = "Error al obtener configuracion del negocio";
+            }
+
+            return [$codigo,$negocioConfiguracion];
+        }
+
         public function actualizarPerfil($params = null) {
             $codigo = "OK";
             $data = [];

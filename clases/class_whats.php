@@ -32,7 +32,7 @@ class whats extends utilidades {
 
         // Obtener número del negocio al que escribieron
         $numero_negocio = $data['entry'][0]['changes'][0]['value']['metadata']['display_phone_number'] ?? '';
-        $negocio = $this->getNegocioUsuario(["numero_negocio"=>$numero_negocio]); // debes crear esta función
+        $negocio = $this->getNegocio(["numero_negocio"=>$numero_negocio]); // debes crear esta función
         // Datos del cliente que escribió
         $nombre = $data['entry'][0]['changes'][0]['value']['contacts'][0]["profile"]["name"] ?? '';
         $numero = $mensaje['from'];
@@ -204,7 +204,6 @@ class whats extends utilidades {
         }
 
         // Enviar la petición con Guzzle
-        error_log(print_r($data,true));
         list($codigoApi,$response) = $this->request("POST", $url, $data);
         return [$codigoApi,$response];
     }

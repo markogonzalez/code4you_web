@@ -32,6 +32,10 @@
             $codigo = "OK";
             $mensaje = "";
 
+            $origen = "";
+            if(isset($params["origen"]) && $params["origen"] != "") 
+            $origen = $this->cleanQuery($params["origen"]);
+
             $nombre = "";
             if(isset($params["nombre"]) && $params["nombre"] != "") 
             $nombre = $this->cleanQuery($params["nombre"]);
@@ -48,7 +52,13 @@
             if(isset($params["correo"]) && $params["correo"] != "") 
             $correo = $this->cleanQuery($params["correo"]);
             // Aqui hay un pedo se manda a llmaar en 3 lugares diferentes, donde funciona bien es en negocio_usuarios, considerar usuarios_lista y revisar el login el tema es en la contraseña
-            $contrasena = $this->generarContrasenaAleatoria();
+            if($origen=="login"){
+                $contrasena = "";
+                if(isset($params["contrasena"]) && $params["contrasena"] != "") 
+                    $contrasena = $this->cleanQuery($params["contrasena"]);
+            }else{
+                $contrasena = $this->generarContrasenaAleatoria();
+            }
             $contrasena_insert = password_hash($contrasena, PASSWORD_DEFAULT);
             
             $perfil_id = 0;
@@ -66,6 +76,10 @@
             $id_negocio = 0;
             if(isset($params["id_negocio"]) && $params["id_negocio"] > 0) 
             $id_negocio = $this->cleanQuery($params["id_negocio"]);
+
+            $numero_negocio = "";
+            if(isset($params["numero_negocio"]) && $params["numero_negocio"] !="") 
+            $numero_negocio = $this->cleanQuery($params["numero_negocio"]);
 
             $user_repeat = "SELECT * FROM master_usuarios WHERE celular ='".$celular."' AND perfil_id =".$perfil_id." AND status = 1";
             $res_repeat = $this->query($user_repeat);
@@ -116,7 +130,7 @@
                             ".$id_negocio."
                         ) ";
                         if($this->query($qry_insert)){
-                            list($codigo,$negocio) = $this->getNegocioUsuario(["id_usuario"=>$this->sesion['id_usuario'],"id_servicio"=>$id_servicio]);
+                            list($codigo,$negocio) = $this->getNegocio(["numero_negocio"=>$numero_negocio]);
                             if($codigo=="OK"){
                                 foreach ($negocio['horarios'] as $horario) {
                                     $qry_insert_horario = "INSERT INTO trabajador_horarios (
@@ -174,6 +188,7 @@
     
                                     $mensaje = trim($errorBienvenida . " " . $errorContra);
                                 }
+                                $mensaje = "El trabajador se ha dado de alta correctamente y recibira un mensaje de whats con su acceso, ahora puede ajustar sus horarios";
                             }else{
                                 $codigo = "ERR";
                                 $mensaje = "Error al obtener información del negocio";
@@ -232,7 +247,8 @@
             u.apellidos,
             u.celular,
             u.perfil_id,
-            p.perfil
+            p.perfil,
+            u.correo
             FROM master_usuarios u
             INNER JOIN catalogo_perfiles p ON u.perfil_id = p.id_perfil
             ".$inner."
@@ -311,14 +327,6 @@
             return $ids;
         }
 
-        public function getNegocio($params = null){
-            $negocio = $this->getNegocioUsuario([
-                'id_usuario' => $params['id_usuario'], 
-                'id_servicio' => $params['id_servicio']
-            ]);
-            // error_log(print_r($negocio,true));
-            return $negocio;
-        }
 
         public function guardarHorarioTrabajador($params = null){
 
