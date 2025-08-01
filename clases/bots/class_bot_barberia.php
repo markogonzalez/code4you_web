@@ -115,7 +115,7 @@
                     "destinatario" => $this->datos_cliente['numero_whats'],
                     "tipo" => "text",
                     "mensaje" => $mensaje,
-                    "id_whats" => $this->datos_cliente['negocio']["id_whats"]
+                    "id_whats" => $this->negocio["id_whats"]
                 ]);
                 return;
             }
