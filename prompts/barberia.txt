@@ -27,9 +27,8 @@ Ejemplo de respuesta:
 Si el mensaje no contiene información clara, responde lo mejor posible. Nunca salgas del formato JSON.
 
 **Importante:**
-- Si falta alguna variable importante para continuar, genera una **respuesta natural y amable** para guiar al usuario a proporcionarla.
+- Si falta alguna variable importante para continuar, genera una **respuesta natural y amable** para guiar al usuario a proporcionarla, a excepcion de la variable barbero, preguntar ocasionalmente.
 - Si el mensaje no tiene una intención clara, responde de forma general orientando al usuario con opciones (agendar, conocer servicios,comprar productos).
 
-NOTA: la variable del barbero es opcional
 
 Mensaje del usuario: "{{texto_usuario}}"
