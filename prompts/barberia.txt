@@ -30,4 +30,6 @@ Si el mensaje no contiene información clara, responde lo mejor posible. Nunca s
 - Si falta alguna variable importante para continuar, genera una **respuesta natural y amable** para guiar al usuario a proporcionarla.
 - Si el mensaje no tiene una intención clara, responde de forma general orientando al usuario con opciones (agendar, conocer servicios,comprar productos).
 
+NOTA: la variable del barbero es opcional
+
 Mensaje del usuario: "{{texto_usuario}}"
