@@ -42,64 +42,6 @@
             }
         }
 
-        public function flujoAgendarCita() {
-            error_log("Quiero agendar cita");
-            $estado_actual = $cliente['flujo_estado'] ?? 'inicio';
-            $respuesta = '';
-            $siguiente_estado = $estado_actual;
-
-            switch ($estado_actual) {
-                case 'inicio':
-                    if (!isset($variables['servicio'])) {
-                        return $this->responderYEsperar("¿Qué servicio deseas? Estos son los disponibles: " . $this->listarServicios($json_negocio), "esperando_servicio", $cliente);
-                    }
-                    $cliente['cita']['servicio'] = $this->buscarServicioId($variables['servicio'], $json_negocio);
-                    $siguiente_estado = 'esperando_fecha';
-                    break;
-
-                case 'esperando_servicio':
-                    $cliente['cita']['servicio'] = $this->buscarServicioId($mensaje['mensaje'], $json_negocio);
-                    $siguiente_estado = 'esperando_fecha';
-                    break;
-
-                case 'esperando_fecha':
-                    if (!isset($variables['fecha'])) {
-                        return $this->responderYEsperar("¿Para qué día deseas la cita? Ejemplo: *mañana*, *viernes* o *5 de agosto*", "esperando_fecha", $cliente);
-                    }
-                    $cliente['cita']['fecha'] = $variables['fecha'];
-                    $siguiente_estado = 'esperando_hora';
-                    break;
-
-                case 'esperando_hora':
-                    if (!isset($variables['hora'])) {
-                        return $this->responderYEsperar("¿A qué hora te gustaría asistir? Ejemplo: *4:30pm*", "esperando_hora", $cliente);
-                    }
-                    $cliente['cita']['hora'] = $variables['hora'];
-                    $siguiente_estado = 'preguntar_barbero';
-                    break;
-
-                case 'preguntar_barbero':
-                    return $this->enviarOpcionesBarbero($cliente, $json_negocio);
-                    break;
-
-                case 'esperando_barbero':
-                    $cliente['cita']['barbero'] = $this->buscarBarberoId($mensaje['mensaje'], $json_negocio);
-                    $siguiente_estado = 'confirmar';
-                    break;
-
-                case 'confirmar':
-                    return $this->confirmarYSolicitarPago($cliente, $json_negocio);
-                    break;
-
-                default:
-                    return $this->responderYEsperar("Vamos a agendar tu cita paso a paso. ¿Qué servicio necesitas?", "esperando_servicio", $cliente);
-            }
-
-            // Actualizar estado y guardar progreso
-            $this->actualizarFlujo($cliente, $siguiente_estado);
-            return null; // Ya se respondió en cada paso
-        }
-
         private function intencionAgendarCita() {
             $vars = $this->interpretacion['variables'];
             $faltantes = [];
@@ -110,11 +52,10 @@
             if (empty($vars['hora'])) $faltantes[] = "hora";
 
             if (count($faltantes)) {
-                $mensaje = "Para agendar tu cita necesito: " . implode(", ", $faltantes) . ". ¿Podrías indicarlo?";
                 $this->whats->enviarRespuesta([
                     "destinatario" => $this->datos_cliente['numero_whats'],
                     "tipo" => "text",
-                    "mensaje" => $mensaje,
+                    "mensaje" => $this->interpretacion['respuesta'],
                     "id_whats" => $this->negocio["id_whats"]
                 ]);
                 return;
