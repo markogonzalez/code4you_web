@@ -47,7 +47,8 @@ class whats extends utilidades {
             "numero" => $numero,
             "nombre" => $nombre, 
             "texto" => $texto,
-            "intencion" => $interpretacion[1]["intencion"]
+            "intencion" => $interpretacion[1]["intencion"],
+            "id_negocio" => $negocio[1]['id_negocio']
         ]);
 
         if ($mensaje['type'] === 'interactive' && $mensaje['interactive']['type'] === 'nfm_reply') {
@@ -368,9 +369,9 @@ class whats extends utilidades {
         $nombre = isset($params["nombre"]) ? $this->cleanQuery($params["nombre"]) : "";
         $texto = isset($params["texto"]) ? $this->cleanQuery($params["texto"]) : "";
         $intencion = $params["intencion"];
-        $negocio = $params["negocio"];
+        $id_negocio = $params["id_negocio"];
                 
-        $query = "SELECT activo, id_cliente, espera_flujo,nombre_whats,numero_whats,intencion FROM negocio_clientes WHERE numero_whats = '".$numero."' AND id_negocio =".$negocio['id_negocio'];
+        $query = "SELECT activo, id_cliente, espera_flujo,nombre_whats,numero_whats,intencion FROM negocio_clientes WHERE numero_whats = '".$numero."' AND id_negocio =".$id_negocio;
         $res = $this->query($query);
 
         if ($res->num_rows > 0) {
@@ -385,12 +386,12 @@ class whats extends utilidades {
             return $data;
         }
 
-        $qry_insert = "INSERT INTO negocio_clientes (numero_whats, nombre_whats, intencion ,id_negocio) VALUES ('".$numero."', '".$nombre."', '".$intencion."',".$negocio['id_negocio'].")";
+        $qry_insert = "INSERT INTO negocio_clientes (numero_whats, nombre_whats, intencion ,id_negocio) VALUES ('".$numero."', '".$nombre."', '".$intencion."',".$id_negocio.")";
         $this->query($qry_insert);
         $id_cliente = $this->conexMySQL->insert_id;
         $this->guardarRespuesta($id_cliente, $texto, 2);
 
-        return ['intencion' => $intencion, 'id_cliente' => $id_cliente, 'espera_flujo' => null,"nombre_whats"=>$nombre,"numero_whats"=>$numero,"negocio"=>$negocio];
+        return ['intencion' => $intencion, 'id_cliente' => $id_cliente, 'espera_flujo' => null,"nombre_whats"=>$nombre,"numero_whats"=>$numero];
     }
 
 }
