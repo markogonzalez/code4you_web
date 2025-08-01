@@ -105,7 +105,7 @@
                 $negocioConfiguracion = "Error al obtener configuracion del negocio";
             }
 
-            return [$codigo,$negocioConfiguracion];
+            return [$codigo,$negocioConfiguracion[1]];
         }
 
         public function actualizarPerfil($params = null) {

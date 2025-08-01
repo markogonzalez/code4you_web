@@ -12,7 +12,7 @@
     "status": 3,
     "foto_perfil": "",
     "fecha_creacion": "2025-07-17 17:18:00",
-    "fecha_actualizacion": "2025-07-31 18:45:15",
+    "fecha_actualizacion": "2025-07-31 21:56:54",
     "servicios": [
         {
             "id_servicio": "1",
@@ -25,6 +25,12 @@
             "nombre": "Estilo barba",
             "duracion": "30",
             "precio": "50.00"
+        },
+        {
+            "id_servicio": "3",
+            "nombre": "Corte cabello para mujer",
+            "duracion": "60",
+            "precio": "150.00"
         }
     ],
     "horarios": {
@@ -71,10 +77,5 @@
             "activo": 0
         }
     },
-    "trabajadores": [
-        {
-            "id_trabajador": "45",
-            "nombre": "Marco"
-        }
-    ]
+    "trabajadores": []
 }
