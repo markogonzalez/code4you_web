@@ -47,7 +47,6 @@ class whats extends utilidades {
             "numero" => $numero,
             "nombre" => $nombre, 
             "texto" => $texto,
-            "negocio" =>$negocio[1],
             "intencion" => $interpretacion[1]["intencion"]
         ]);
 
@@ -63,7 +62,7 @@ class whats extends utilidades {
         if (file_exists($archivo_clase)) {
             include_once($archivo_clase);
             if(class_exists($clase_bot)){
-                $bot = new $clase_bot($datos_cliente, $interpretacion[1]);
+                $bot = new $clase_bot($datos_cliente, $interpretacion[1],$negocio[1]);
                 $bot->despachar();
             }else{
                 error_log("Clase no encontrada: $clase_bot");

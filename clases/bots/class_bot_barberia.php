@@ -7,11 +7,13 @@
         private $whats;
         private $datos_cliente;
         private $interpretacion;
+        private $negocio;
         
-        public function __construct($datos_cliente,$interpretacion) {
+        public function __construct($datos_cliente,$interpretacion,$negocio) {
             @$this->whats = new whats();
             $this->datos_cliente = $datos_cliente;
             $this->interpretacion = $interpretacion;
+            $this->negocio = $negocio;
         } //function __construct
 
         public function despachar() {
@@ -20,11 +22,6 @@
             $handlers = [
                 'saludo' => fn() => $this->intencionSaludo(),
                 'agendar_cita' => fn() => $this->intencionAgendarCita(),
-                'conocer_servicios' => fn() => $this->intencionServicios(),
-                'comprar_producto' => fn() => $this->intencionCompra(),
-                'cancelar_cita' => fn() => $this->intencionCancelar(),
-                'realizar_pago' => fn() => $this->intencionPago(),
-                'otra' => fn() => $this->intencionGenerica()
             ];
 
             ($handlers[$intencion] ?? $handlers['otra'])();
@@ -37,10 +34,10 @@
                     "destinatario" => $this->datos_cliente['numero_whats'],
                     "tipo" => "text",
                     "mensaje" => $this->interpretacion['respuesta'],
-                    "id_whats" => $this->datos_cliente['negocio']["id_whats"]
+                    "id_whats" => $this->negocio["id_whats"]
                 ]);
                 if($mensaje[0]=="OK"){
-                    $this->guardarRespuestaWhats($this->datos_cliente['id_cliente'],$this->interpretacion['respuesta'],1);
+                    $this->whats->guardarRespuestaWhats($this->datos_cliente['id_cliente'],$this->interpretacion['respuesta'],1);
                 }
             }
         }
