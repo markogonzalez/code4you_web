@@ -42,7 +42,8 @@
             }
         }
 
-        private function intencionAgendarCita() {
+        public function intencionAgendarCita() {
+            error_log("Entre");
             $vars = $this->interpretacion['variables'];
             $faltantes = [];
 
@@ -60,7 +61,7 @@
                 ]);
                 return;
             }
-
+            // HAcer variable para ver si metemos esto como pago extra o opciones bla bla como variables de configuracion del negicon en json
             // Si NO especificó barbero, preguntamos si desea uno o le asignamos
             if (empty($vars['barbero'])) {
                 $mensaje = "¿Tienes algún barbero de preferencia o quieres que asignemos al primero disponible en ese horario?";

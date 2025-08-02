@@ -1,0 +1,67 @@
+
+<div class="row g-5 g-xl-8">
+    <h2 class="card-title align-items-start flex-column">
+        <span class="card-label fw-bold text-gray-800">Chats</span>
+    </h2>
+    <!--begin::Col-->
+    <div class="card card-flush">
+        <div class="card-header pt-7">
+            <form class="d-flex align-items-center position-relative w-100 m-0" autocomplete="off">
+                <i class="ki-solid ki-magnifier fs-3 text-gray-500 position-absolute top-50 ms-5 translate-middle-y"></i>
+                <input type="text" class="form-control form-control-solid ps-13" name="busqueda" id="busqueda" value="" placeholder="Buscar" />
+            </form>
+        </div>
+        <div class="card-body pt-5" >
+            <div class="scroll-y me-n5 pe-5 h-200px h-lg-auto" id="div_chats" data-kt-scroll="true" data-kt-scroll-activate="{default: false, lg: true}" data-kt-scroll-max-height="auto" data-kt-scroll-dependencies="#kt_header, #kt_app_header, #kt_toolbar, #kt_app_toolbar, #kt_footer, #kt_app_footer, #kt_chat_contacts_header" data-kt-scroll-wrappers="#kt_content, #kt_app_content, #kt_chat_contacts_body" data-kt-scroll-offset="5px" style="">
+            
+            </div>
+        </div>
+    </div>
+    <div class="card" id="div_informacion">
+        <div class="card-body p-0">
+            <div class="card-px text-center py-20 my-10">
+                <p class="fs-4 fw-semibold mb-10">Selecciona algún cliente para poder mandar mensajes</p>
+                <img src="assets/img/chats.png" style="width: 250px;">
+            </div>
+        </div>
+    </div>
+    <div class="card" id="div_chats_personal" style="display: none;">
+        <div class="card-header" >
+            <div class="card-title">
+                <div class="d-flex justify-content-center me-3">
+                    <div class="me-3 align-items-center d-flex">
+                        <i class="ki-solid ki-profile-circle icono-chats"></i>
+                    </div>
+                    <div>
+                        <p class="fs-4 fw-bold text-gray-900 text-hover-primary me-1 mb-2 lh-1" id="numero_encabezado"></p>
+                        <div class="mb-0 lh-1">
+                            <span class="fs-7 fw-semibold text-muted" id="nombre_encabezado"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="scroll-y me-n5 pe-5 h-300px h-lg-auto" id="div_conversaciones" >
+                
+            </div>
+        </div>
+
+        <div class="card-footer pt-4">
+            <textarea class="form-control form-control-flush mb-3" rows="1" id="mensaje" name="mensaje" placeholder="Escribe el mensaje" value=""></textarea>
+            <input type="hidden" id="id_cliente" value="0">
+            <input type="hidden" id="destinatario" value="">
+            <div class="d-flex flex-stack">
+                <div class="d-flex align-items-center me-2">
+                    <button class="btn btn-sm btn-icon btn-active-light-primary me-1" type="button" >
+                        <i class="ki-solid ki-paper-clip fs-3"></i>
+                    </button>
+                </div>
+
+                <button class="btn btn-primary" type="button" id="btn_enviar">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+</div>
