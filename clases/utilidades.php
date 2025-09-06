@@ -160,7 +160,7 @@
             $key     = TOKEN_C4Y;  // Defínela en config o variable de entorno
             $payload = [
                 "iat"     => $time,                   // emitido en
-                "exp"     => $time + 3600 * 24,            // expira en 24 hora
+                "exp"     => $time + 3600,            // expira en 24 hora
                 "id_usuario"     => $id_usuario,          // subject: ID de usuario
                 "perfil_id"  => $perfil_id
             ];
@@ -168,6 +168,50 @@
             // 3) Generar token
             $token = JWT::encode($payload, $key, 'HS256');
             return $token;
+        }
+
+        public function renovarTokenUtilidades($token) {
+
+            $codigo = "ERR";
+            $mensaje = "Token inválido o expirado.";
+            $data = [];
+
+            $clave = TOKEN_C4Y;
+            try {
+                $decoded = JWT::decode($token, new Key($clave, 'HS256'));
+                $payload = (array) $decoded;
+
+                // Verifica tiempo restante
+                $exp = $payload['exp'];
+                $now = time();
+
+                if (($exp - $now) < 0) {
+                    return [$codigo, "Token expirado."];
+                }
+
+                // Renueva token con nueva expiración
+                $payload['iat'] = $now;
+                $payload['exp'] = $now + (60 * 30); // 30 minutos extra
+
+                $nuevo_token = JWT::encode($payload, $clave, 'HS256');
+                $data = [ "token" => $nuevo_token ];
+                return ["OK", $data];
+
+            } catch (Exception $e) {
+                return [$codigo, "Error al renovar token: " . $e->getMessage()];
+            }
+        }
+
+        function verificarToken($token) {
+
+            if (!$token) return [false, "Token no encontrado"];
+
+            try {
+                $decoded = JWT::decode($token, new Key(TOKEN_C4Y, 'HS256'));
+                return [true, $decoded];
+            } catch (Exception $e) {
+                return [false, "Token inválido o expirado"];
+            }
         }
 
         public function setPermisosPerfil($params = null){
@@ -313,13 +357,55 @@
             return $contrasena;
         }
 
-        public function guardarRespuestaWhats($cliente_id, $texto, $tipo_mensaje) {
-            $qry_insert = "INSERT INTO conversaciones_whats (mensaje, cliente_id,tipo_mensaje) VALUES ('".$texto."', ".$cliente_id.", ".$tipo_mensaje.")";
+        public function guardarRespuestaWhats($params = null) {
+            
+            $codigo = "OK";
+
+            $id_cliente = isset($params["id_cliente"]) ? $this->cleanQuery($params["id_cliente"]) : 0;
+            $id_negocio = isset($params["id_negocio"]) ? $this->cleanQuery($params["id_negocio"]) : 0;
+            $mensaje = isset($params["mensaje"]) ? $this->cleanQuery($params["mensaje"]) : "";
+            $tipo = isset($params["tipo"]) ? $this->cleanQuery($params["tipo"]) : "";
+            $modulo_origen = isset($params["modulo_origen"]) ? $this->cleanQuery($params["modulo_origen"]) : "";
+            $tipo_whats = isset($params["tipo_whats"]) ? $this->cleanQuery($params["tipo_whats"]) : "";
+            $id_usuario = isset($params["id_usuario"]) ? $this->cleanQuery($params["id_usuario"]) : null;
+            $mensaje_id_externo = isset($params["mensaje_id_externo"]) ? $this->cleanQuery($params["mensaje_id_externo"]) : "";
+            $estado_salida = isset($params["estado_salida"]) ? $this->cleanQuery($params["estado_salida"]) : "";
+            $respuesta_interactiva = isset($params["respuesta_interactiva"]) ? $this->cleanQuery($params["respuesta_interactiva"]) : 0;
+            $metadata = isset($params["metadata"]) ? json_encode($params["metadata"]) : null;
+
+             $qry_insert = "INSERT INTO mensajes_chat (
+                    id_cliente,
+                    id_negocio,
+                    mensaje,
+                    tipo,
+                    modulo_origen,
+                    tipo_whats,
+                    id_usuario,
+                    mensaje_id_externo,
+                    estado_salida,
+                    respuesta_interactiva,
+                    metadata
+                ) VALUES (
+                    $id_cliente, 
+                    $id_negocio,
+                    '$mensaje',
+                    '$tipo',
+                    '$modulo_origen',
+                    '$tipo_whats', 
+                    $id_usuario,
+                    '$mensaje_id_externo',
+                    '$estado_salida',
+                    $respuesta_interactiva,
+                    '$metadata')";
+
             try {
                 $this->query($qry_insert);
             } catch (Exception $e) {
                 error_log("Error al guardar la respuesta: " . $e->getMessage());
+                $codigo = "ERR";
             }
+
+            return[$codigo];
         }
 
         public function actualizarIntencionWhats($params = null) {

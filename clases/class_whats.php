@@ -38,7 +38,7 @@ class whats extends utilidades {
         $numero = $mensaje['from'];
         $texto = strtolower(trim($mensaje['text']['body'] ?? ''));
 
-        // 3. Consultar ChatGPT para interpretar el mensaje
+        // Consultar ChatGPT para interpretar el mensaje
         $interpretacion = $this->openAI->interpretarConChatGPT(["mensaje" => $texto]);
         if ($interpretacion[0]!="OK") return;
 
@@ -51,27 +51,39 @@ class whats extends utilidades {
             "id_negocio" => $negocio[1]['id_negocio']
         ]);
 
-        if ($mensaje['type'] === 'interactive' && $mensaje['interactive']['type'] === 'nfm_reply') {
-            $this->guardarFlujo($datos_cliente, $mensaje);
-            $estado = "Ejecutivo";
-        }
-        
-        $tipo_bot = $negocio[1]['tipo_bot']; // ej. 'barberia'
-        $clase_bot = "bot_" . $tipo_bot;     // 'bot_barberia'
-        $archivo_clase = __DIR__ . "/bots/class_$clase_bot.php";
+        list($codigo) =$this->guardarRespuestaWhats([
+            "id_cliente" => $datos_cliente['id_cliente'],
+            "id_negocio" => $negocio[1]['id_negocio'],
+            "mensaje" => $texto,
+            "tipo" => "cliente",
+            "modulo_origen" => $negocio[1]['tipo_bot'],
+            "tipo_whats" => $mensaje['type'],
+            "mensaje_id_externo" => $mensaje_id,
+            "respuesta_interactiva" => isset($mensaje['interactive']) ? 1 : 0,
+            "metadata" => [
+                "numero_contacto" => $numero,
+                "raw" => $mensaje // Puedes guardar el payload completo si quieres
+            ]
+        ]);
 
-        if (file_exists($archivo_clase)) {
-            include_once($archivo_clase);
-            if(class_exists($clase_bot)){
-                $bot = new $clase_bot($datos_cliente, $interpretacion[1],$negocio[1]);
-                $bot->despachar();
+        if($codigo=="OK"){
+            $tipo_bot = $negocio[1]['tipo_bot']; // ej. 'barberia'
+            $clase_bot = "bot_" . $tipo_bot;     // 'bot_barberia'
+            $archivo_clase = __DIR__ . "/bots/class_$clase_bot.php";
+    
+            if (file_exists($archivo_clase)) {
+                include_once($archivo_clase);
+                if(class_exists($clase_bot)){
+                    $bot = new $clase_bot($datos_cliente, $interpretacion[1],$negocio[1]);
+                    $bot->despachar();
+                }else{
+                    error_log("Clase no encontrada: $clase_bot");
+                }
             }else{
-                error_log("Clase no encontrada: $clase_bot");
+                error_log("Archivo de clase no encontrado: $archivo_clase");
             }
-        }else{
-            error_log("Archivo de clase no encontrado: $archivo_clase");
         }
-        
+
     }
 
     private function request($method, $endpoint, $body = []) {
