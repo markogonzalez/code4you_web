@@ -367,9 +367,9 @@
             $tipo = isset($params["tipo"]) ? $this->cleanQuery($params["tipo"]) : "";
             $modulo_origen = isset($params["modulo_origen"]) ? $this->cleanQuery($params["modulo_origen"]) : "";
             $tipo_whats = isset($params["tipo_whats"]) ? $this->cleanQuery($params["tipo_whats"]) : "";
-            $id_usuario = isset($params["id_usuario"]) ? $this->cleanQuery($params["id_usuario"]) : null;
+            $id_usuario = isset($params["id_usuario"]) ? $this->cleanQuery($params["id_usuario"]) : 0;
             $mensaje_id_externo = isset($params["mensaje_id_externo"]) ? $this->cleanQuery($params["mensaje_id_externo"]) : "";
-            $estado_salida = isset($params["estado_salida"]) ? $this->cleanQuery($params["estado_salida"]) : "";
+            $estado_salida = isset($params["estado_salida"]) ? $this->cleanQuery($params["estado_salida"]) : "enviado";
             $respuesta_interactiva = isset($params["respuesta_interactiva"]) ? $this->cleanQuery($params["respuesta_interactiva"]) : 0;
             $metadata = isset($params["metadata"]) ? json_encode($params["metadata"]) : null;
 
