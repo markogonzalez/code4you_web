@@ -94,9 +94,9 @@ class whats extends utilidades {
 
         foreach ($statusData as $status) {
 
-            $message_id      = $status["id"] ?? null;
-            $status          = $status["status"] ?? null;
-            $timestamp       = $status["timestamp"] ?? null;
+            $message_id = $status["id"] ?? null;
+            $status = $status["status"] ?? null;
+            $timestamp = $status["timestamp"] ?? null;
             $conversation_id = $status["conversation"]["id"] ?? null;
 
             $error_code    = $status["errors"][0]["code"] ?? null;

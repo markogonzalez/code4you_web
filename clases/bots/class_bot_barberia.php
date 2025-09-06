@@ -30,20 +30,30 @@
         private function intencionSaludo($params = null) {
 
             if($this->interpretacion['intencion']=="saludo"){
-                $mensaje = $this->whats->enviarRespuesta([
+                list($codigo,$response) = $this->whats->enviarRespuesta([
                     "destinatario" => $this->datos_cliente['numero_whats'],
                     "tipo" => "text",
                     "mensaje" => $this->interpretacion['respuesta'],
                     "id_whats" => $this->negocio["id_whats"]
                 ]);
-                if($mensaje[0]=="OK"){
-                    $this->whats->guardarRespuestaWhats($this->datos_cliente['id_cliente'],$this->interpretacion['respuesta'],1);
+                if($codigo=="OK"){
+                    $this->whats->guardarRespuestaWhats([
+                        "id_cliente" => $this->datos_cliente['id_cliente'],
+                        "id_negocio" => $this->negocio['id_negocio'],
+                        "mensaje" => $this->interpretacion['respuesta'],
+                        "tipo" => "bot",
+                        "tipo_whats" => "text",
+                        "estado_salida" => "sent",
+                        "modulo_origen" => "bot",
+                        "mensaje_id_externo" => $response['messages'][0]['id'],
+                        "metadata" => $response
+                    ]);
                 }
             }
         }
 
         public function intencionAgendarCita() {
-            error_log("Entre");
+
             $vars = $this->interpretacion['variables'];
             $faltantes = [];
 
