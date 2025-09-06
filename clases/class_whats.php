@@ -87,32 +87,42 @@ class whats extends utilidades {
     }
 
     public function procesarWebhookStatus($params = []) {
-        $json = json_decode($params["data"], true);
+        $data_raw = $params["data"] ?? "";
+        $json = json_decode($data_raw, true);
+        
+        $statusData = $json["entry"][0]["changes"][0]["value"]["statuses"] ?? [];
 
-        if (!isset($json["entry"][0]["changes"][0]["value"]["statuses"][0])) {
-            return;
-        }
+        foreach ($statusData as $status) {
 
-        $statusData = $json["entry"][0]["changes"][0]["value"]["statuses"][0];
+            $message_id      = $status["id"] ?? null;
+            $status          = $status["status"] ?? null;
+            $timestamp       = $status["timestamp"] ?? null;
+            $conversation_id = $status["conversation"]["id"] ?? null;
 
-        $message_id      = $statusData["id"] ?? null;
-        $status          = $statusData["status"] ?? null;
-        $timestamp       = $statusData["timestamp"] ?? null;
-        $conversation_id = $statusData["conversation"]["id"] ?? null;
+            $error_code    = $status["errors"][0]["code"] ?? null;
+            $error_title   = $status["errors"][0]["title"] ?? null;
+            $error_details = $status["errors"][0]["details"] ?? null;
 
-        $error_code    = $statusData["errors"][0]["code"] ?? null;
-        $error_title   = $statusData["errors"][0]["title"] ?? null;
-        $error_details = $statusData["errors"][0]["details"] ?? null;
+            // Armar detalle si hubo error
+            $detalle_estado = null;
+            if ($status === 'failed') {
+                $detalle_estado = "Código: $error_code. Título: $error_title. Detalle: $error_details";
+            }
 
-        // Armar detalle si hubo error
-        $detalle_estado = null;
-        if ($status === 'failed') {
-            $detalle_estado = "Código: $error_code. Título: $error_title. Detalle: $error_details";
-        }
+            // Actualizar en BD
+            if($message_id && $status !== null){
+                $sql = "UPDATE negocio_chats 
+                    SET estado_salida = '$status', 
+                        detalle_estado = '$detalle_estado'
+                    WHERE mensaje_id_externo = '$message_id'";
 
-        // Actualizar en BD
-        if($message_id && $status !== null){
-            $this->actualizarEstadoMensajeWhatsApp($message_id, $status, $detalle_estado);
+                try {
+                    $this->query($sql);
+                } catch (Exception $e) {
+                    error_log("Error al guardar la respuesta: " . $e->getMessage());
+                    $codigo = "ERR";
+                }
+            }
         }
     }
 
@@ -434,24 +444,6 @@ class whats extends utilidades {
         $this->guardarRespuesta($id_cliente, $texto, 2);
 
         return ['intencion' => $intencion, 'id_cliente' => $id_cliente, 'espera_flujo' => null,"nombre_whats"=>$nombre,"numero_whats"=>$numero];
-    }
-
-    private function actualizarEstadoMensajeWhatsApp($mensaje_id, $estado_salida, $detalle = null) {
-
-        $codigo ="OK";
-        $sql = "UPDATE negocio_chats 
-                SET estado_salida = '$estado_salida', 
-                    detalle_estado = '$detalle'
-                WHERE mensaje_id_externo = '$mensaje_id'";
-
-        try {
-            $this->query($sql);
-        } catch (Exception $e) {
-            error_log("Error al guardar la respuesta: " . $e->getMessage());
-            $codigo = "ERR";
-        }
-
-        return [$codigo];
     }
 
 }
