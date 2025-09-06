@@ -369,11 +369,12 @@
             $tipo_whats = isset($params["tipo_whats"]) ? $this->cleanQuery($params["tipo_whats"]) : "";
             $id_usuario = isset($params["id_usuario"]) ? $this->cleanQuery($params["id_usuario"]) : 0;
             $mensaje_id_externo = isset($params["mensaje_id_externo"]) ? $this->cleanQuery($params["mensaje_id_externo"]) : "";
-            $estado_salida = isset($params["estado_salida"]) ? $this->cleanQuery($params["estado_salida"]) : "enviado";
+            $estado_salida = isset($params["estado_salida"]) ? $this->cleanQuery($params["estado_salida"]) : "";
             $respuesta_interactiva = isset($params["respuesta_interactiva"]) ? $this->cleanQuery($params["respuesta_interactiva"]) : 0;
             $metadata = isset($params["metadata"]) ? json_encode($params["metadata"]) : null;
 
-             $qry_insert = "INSERT INTO mensajes_chat (
+            if($mensaje!=""){
+                $qry_insert = "INSERT INTO negocio_chats (
                     id_cliente,
                     id_negocio,
                     mensaje,
@@ -397,13 +398,15 @@
                     '$estado_salida',
                     $respuesta_interactiva,
                     '$metadata')";
-
-            try {
-                $this->query($qry_insert);
-            } catch (Exception $e) {
-                error_log("Error al guardar la respuesta: " . $e->getMessage());
-                $codigo = "ERR";
+    
+                try {
+                    $this->query($qry_insert);
+                } catch (Exception $e) {
+                    error_log("Error al guardar la respuesta: " . $e->getMessage());
+                    $codigo = "ERR";
+                }
             }
+
 
             return[$codigo];
         }

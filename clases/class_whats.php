@@ -86,6 +86,36 @@ class whats extends utilidades {
 
     }
 
+    public function procesarWebhookStatus($params = []) {
+        $json = json_decode($params["data"], true);
+
+        if (!isset($json["entry"][0]["changes"][0]["value"]["statuses"][0])) {
+            return;
+        }
+
+        $statusData = $json["entry"][0]["changes"][0]["value"]["statuses"][0];
+
+        $message_id      = $statusData["id"] ?? null;
+        $status          = $statusData["status"] ?? null;
+        $timestamp       = $statusData["timestamp"] ?? null;
+        $conversation_id = $statusData["conversation"]["id"] ?? null;
+
+        $error_code    = $statusData["errors"][0]["code"] ?? null;
+        $error_title   = $statusData["errors"][0]["title"] ?? null;
+        $error_details = $statusData["errors"][0]["details"] ?? null;
+
+        // Armar detalle si hubo error
+        $detalle_estado = null;
+        if ($status === 'failed') {
+            $detalle_estado = "Código: $error_code. Título: $error_title. Detalle: $error_details";
+        }
+
+        // Actualizar en BD
+        if($message_id && $status !== null){
+            $this->actualizarEstadoMensajeWhatsApp($message_id, $status, $detalle_estado);
+        }
+    }
+
     private function request($method, $endpoint, $body = []) {
         $codigo = "OK";
         $data = [];
@@ -404,6 +434,24 @@ class whats extends utilidades {
         $this->guardarRespuesta($id_cliente, $texto, 2);
 
         return ['intencion' => $intencion, 'id_cliente' => $id_cliente, 'espera_flujo' => null,"nombre_whats"=>$nombre,"numero_whats"=>$numero];
+    }
+
+    private function actualizarEstadoMensajeWhatsApp($mensaje_id, $estado_salida, $detalle = null) {
+
+        $codigo ="OK";
+        $sql = "UPDATE negocio_chats 
+                SET estado_salida = '$estado_salida', 
+                    detalle_estado = '$detalle'
+                WHERE mensaje_id_externo = '$mensaje_id'";
+
+        try {
+            $this->query($sql);
+        } catch (Exception $e) {
+            error_log("Error al guardar la respuesta: " . $e->getMessage());
+            $codigo = "ERR";
+        }
+
+        return [$codigo];
     }
 
 }

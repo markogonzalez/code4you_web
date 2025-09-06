@@ -31,8 +31,18 @@ if (!hash_equals($expected_hash, $signature)) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $json = json_decode($raw_body, true);
+
+    if (isset($json["entry"][0]["changes"][0]["value"]["statuses"])) {
+        $whats->procesarWebhookStatus(["data" => $raw_body]);
+    }
+
+    if (isset($json["entry"][0]["changes"][0]["value"]["messages"])) {
+        $whats->procesarWebhookWhatsApp(["data" => $raw_body]);
+    }
+
     http_response_code(200);
-    $response = $whats->procesarWebhookWhatsApp(["data"=>$raw_body]);
+    echo "OK";
 }
 
 ?>
