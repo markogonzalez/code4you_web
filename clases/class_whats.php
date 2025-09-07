@@ -109,19 +109,19 @@ class whats extends utilidades {
     public function procesarWebhookStatus($params = []) {
         $data_raw = $params["data"] ?? "";
         $json = json_decode($data_raw, true);
-        error_log("Procesando webhook de estado: " . print_r($json, true));
+        // error_log("Procesando webhook de estado: " . print_r($json, true));
         $statusData = $json["entry"][0]["changes"][0]["value"]["statuses"] ?? [];
         // Obtener número del negocio al que escribieron
         $numero_negocio = substr($json['entry'][0]['changes'][0]['value']['metadata']['display_phone_number'],3) ?? '';
         $negocio = $this->getNegocio(["numero_negocio"=>$numero_negocio]); // debes crear esta función
-        error_log("Procesando estado para el negocio con número: $numero_negocio");
+
         $datos_cliente = $this->obtenerOInsertarCliente([
             "numero" => $statusData[0]['recipient_id'],
             "id_negocio" => $negocio[1]['id_negocio']
         ]);
         $id_mensaje_externo = $statusData[0]["id"] ?? null;
         $qry = "SELECT id_mensaje FROM negocio_chats WHERE mensaje_id_externo = '$id_mensaje_externo'";
-        error_log("Consultando mensaje con ID externo: $id_mensaje_externo");
+
         $res = $this->query($qry);
         $row = $res->fetch_assoc();
         $id_mensaje = $row['id_mensaje'] ?? null;
