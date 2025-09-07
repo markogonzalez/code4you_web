@@ -1,5 +1,5 @@
 <?php 
-
+    require_once "clases/autenticacion.php";
     include_once 'clases/class_whats.php';
 	include_once 'utilidades.php';
 
@@ -20,6 +20,11 @@
             }
             @$this->whats = new whats();
             $this->id_modulo = 4;
+
+            $val =  autenticacion::validar();
+            if ($val['code'] != 'OK') {
+                return ['code' => 'Token', 'mensaje' => $val['mensaje']];
+            }
             
         } //function __construct
         

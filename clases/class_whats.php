@@ -3,6 +3,7 @@ include_once 'utilidades.php';
 include_once 'class_openAI.php';
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+date_default_timezone_set('America/Mazatlan');
 
 class whats extends utilidades {
 
@@ -51,7 +52,7 @@ class whats extends utilidades {
             "id_negocio" => $negocio[1]['id_negocio']
         ]);
 
-        list($codigo) =$this->guardarRespuestaWhats([
+        list($codigo,$id_mensaje) =$this->guardarRespuestaWhats([
             "id_cliente" => $datos_cliente['id_cliente'],
             "id_negocio" => $negocio[1]['id_negocio'],
             "mensaje" => $texto,
@@ -65,23 +66,42 @@ class whats extends utilidades {
                 "raw" => $mensaje // Puedes guardar el payload completo si quieres
             ]
         ]);
+        $fechaISO = date("c", strtotime(date("Y-m-d H:i:s")));
+        $horas = new DateTime($fechaISO);
+        if($codigo=="OK" && $id_mensaje > 0){
+            $this->emitirSocket(
+                "mensajeRecibido",
+                "sala_cliente_".$datos_cliente['id_cliente'],
+                [
+                    "id_mensaje" => $id_mensaje,
+                    "id_cliente" => $datos_cliente['id_cliente'],
+                    "id_negocio" => $negocio[1]['id_negocio'],
+                    "mensaje" => $texto,
+                    "fecha_iso" => $fechaISO,
+                    "fecha_mostrar" => $horas->format('H:i'),
+                    "tipo" => "cliente",
+                    "numero_whats" => $datos_cliente['numero_whats'],
+                ]
+            );
 
-        if($codigo=="OK"){
-            $tipo_bot = $negocio[1]['tipo_bot']; // ej. 'barberia'
-            $clase_bot = "bot_" . $tipo_bot;     // 'bot_barberia'
-            $archivo_clase = __DIR__ . "/bots/class_$clase_bot.php";
-    
-            if (file_exists($archivo_clase)) {
-                include_once($archivo_clase);
-                if(class_exists($clase_bot)){
-                    $bot = new $clase_bot($datos_cliente, $interpretacion[1],$negocio[1]);
-                    $bot->despachar();
+            if($datos_cliente['atencion']=="bot"){
+                $tipo_bot = $negocio[1]['tipo_bot']; // ej. 'barberia'
+                $clase_bot = "bot_" . $tipo_bot;     // 'bot_barberia'
+                $archivo_clase = __DIR__ . "/bots/class_$clase_bot.php";
+        
+                if (file_exists($archivo_clase)) {
+                    include_once($archivo_clase);
+                    if(class_exists($clase_bot)){
+                        $bot = new $clase_bot($datos_cliente, $interpretacion[1],$negocio[1]);
+                        $bot->despachar();
+                    }else{
+                        error_log("Clase no encontrada: $clase_bot");
+                    }
                 }else{
-                    error_log("Clase no encontrada: $clase_bot");
+                    error_log("Archivo de clase no encontrado: $archivo_clase");
                 }
-            }else{
-                error_log("Archivo de clase no encontrado: $archivo_clase");
             }
+
         }
 
     }
@@ -89,12 +109,25 @@ class whats extends utilidades {
     public function procesarWebhookStatus($params = []) {
         $data_raw = $params["data"] ?? "";
         $json = json_decode($data_raw, true);
-        
+        error_log("Procesando webhook de estado: " . print_r($json, true));
         $statusData = $json["entry"][0]["changes"][0]["value"]["statuses"] ?? [];
+        // Obtener número del negocio al que escribieron
+        $numero_negocio = substr($json['entry'][0]['changes'][0]['value']['metadata']['display_phone_number'],3) ?? '';
+        $negocio = $this->getNegocio(["numero_negocio"=>$numero_negocio]); // debes crear esta función
+        error_log("Procesando estado para el negocio con número: $numero_negocio");
+        $datos_cliente = $this->obtenerOInsertarCliente([
+            "numero" => $statusData[0]['recipient_id'],
+            "id_negocio" => $negocio[1]['id_negocio']
+        ]);
+        $id_mensaje_externo = $statusData[0]["id"] ?? null;
+        $qry = "SELECT id_mensaje FROM negocio_chats WHERE mensaje_id_externo = '$id_mensaje_externo'";
+        error_log("Consultando mensaje con ID externo: $id_mensaje_externo");
+        $res = $this->query($qry);
+        $row = $res->fetch_assoc();
+        $id_mensaje = $row['id_mensaje'] ?? null;
 
         foreach ($statusData as $status) {
 
-            $message_id = $status["id"] ?? null;
             $status = $status["status"] ?? null;
             $timestamp = $status["timestamp"] ?? null;
             $conversation_id = $status["conversation"]["id"] ?? null;
@@ -110,14 +143,23 @@ class whats extends utilidades {
             }
 
             // Actualizar en BD
-            if($message_id && $status !== null){
+            if($id_mensaje !== null && $status !== null){
                 $sql = "UPDATE negocio_chats 
                     SET estado_salida = '$status', 
                         detalle_estado = '$detalle_estado'
-                    WHERE mensaje_id_externo = '$message_id'";
+                    WHERE mensaje_id_externo = '$id_mensaje_externo'";
 
                 try {
                     $this->query($sql);
+                    $this->emitirSocket(
+                        "actualizar_estado_mensaje",
+                        "sala_cliente_".$datos_cliente['id_cliente'],
+                        [
+                            "id_mensaje" => $id_mensaje,
+                            "id_cliente" => $datos_cliente['id_cliente'],
+                            "estado_salida" => $status,
+                        ]
+                    );
                 } catch (Exception $e) {
                     error_log("Error al guardar la respuesta: " . $e->getMessage());
                     $codigo = "ERR";
@@ -423,7 +465,7 @@ class whats extends utilidades {
         $intencion = $params["intencion"];
         $id_negocio = $params["id_negocio"];
                 
-        $query = "SELECT activo, id_cliente, espera_flujo,nombre_whats,numero_whats,intencion FROM negocio_clientes WHERE numero_whats = '".$numero."' AND id_negocio =".$id_negocio;
+        $query = "SELECT activo, id_cliente, espera_flujo,nombre_whats,numero_whats,intencion,atencion FROM negocio_clientes WHERE numero_whats = '".$numero."' AND id_negocio =".$id_negocio;
         $res = $this->query($query);
 
         if ($res->num_rows > 0) {
@@ -433,17 +475,51 @@ class whats extends utilidades {
                 "intencion" => $intencion,
                 "espera_flujo" => ""
             ]);
-            $this->guardarRespuestaWhats($data['id_cliente'], $texto, 2);
-            $data["negocio"] = $negocio;
+
             return $data;
         }
 
         $qry_insert = "INSERT INTO negocio_clientes (numero_whats, nombre_whats, intencion ,id_negocio) VALUES ('".$numero."', '".$nombre."', '".$intencion."',".$id_negocio.")";
         $this->query($qry_insert);
         $id_cliente = $this->conexMySQL->insert_id;
-        $this->guardarRespuesta($id_cliente, $texto, 2);
+        return ['intencion' => $intencion, 'id_cliente' => $id_cliente, 'espera_flujo' => null,"nombre_whats"=>$nombre,"numero_whats"=>$numero,"atencion"=>"bot"];
+    }
 
-        return ['intencion' => $intencion, 'id_cliente' => $id_cliente, 'espera_flujo' => null,"nombre_whats"=>$nombre,"numero_whats"=>$numero];
+    function emitirSocket($evento, $sala, $data, $namespace = "code4you") {
+        error_log("🧪 Emitiendo evento: $evento a la sala $sala con datos: " . json_encode($data));
+        $url = "http://localhost:3000/api"; // O IP real si estás en producción
+
+        $payload = json_encode([
+            "evento" => $evento,
+            "datos" => $data,
+            "sala" => $sala,
+            "namespace" => $namespace
+        ]);
+        $tokenJWT = $this->generarToken([
+            "id_cliente" => $data['id_cliente'],
+            "pefil_id" => 4 // Perfil cliente
+        ]);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Content-Type: application/json",
+            "Content-Length: " . strlen($payload),
+            "Authorization: Bearer $tokenJWT",
+        ]);
+
+        $response = curl_exec($ch);
+        $error = curl_error($ch);
+        error_log($response);
+        curl_close($ch);
+
+        if ($error) {
+            error_log("❌ Error al emitir socket: " . $error);
+        } else {
+            error_log("✅ Socket emitido: " . $response);
+        }
     }
 
 }

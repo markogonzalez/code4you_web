@@ -154,6 +154,7 @@
             $token = null;
             $id_usuario    = $this->cleanQuery($params["id_usuario"] ?? 0);
             $perfil_id    = $this->cleanQuery($params["perfil_id"] ?? 0);
+            $id_cliente    = $this->cleanQuery($params["id_cliente"] ?? 0);
 
             // 2) Crear payload JWT
             $time    = time();
@@ -162,7 +163,8 @@
                 "iat"     => $time,                   // emitido en
                 "exp"     => $time + 3600,            // expira en 24 hora
                 "id_usuario"     => $id_usuario,          // subject: ID de usuario
-                "perfil_id"  => $perfil_id
+                "perfil_id"  => $perfil_id,
+                "id_cliente"  => $id_cliente,
             ];
 
             // 3) Generar token
@@ -360,7 +362,7 @@
         public function guardarRespuestaWhats($params = null) {
             
             $codigo = "OK";
-
+            $id_mensaje = 0;
             $id_cliente = isset($params["id_cliente"]) ? $this->cleanQuery($params["id_cliente"]) : 0;
             $id_negocio = isset($params["id_negocio"]) ? $this->cleanQuery($params["id_negocio"]) : 0;
             $mensaje = isset($params["mensaje"]) ? $this->cleanQuery($params["mensaje"]) : "";
@@ -385,7 +387,8 @@
                     mensaje_id_externo,
                     estado_salida,
                     respuesta_interactiva,
-                    metadata
+                    metadata,
+                    fecha_envio
                 ) VALUES (
                     $id_cliente, 
                     $id_negocio,
@@ -397,10 +400,12 @@
                     '$mensaje_id_externo',
                     '$estado_salida',
                     $respuesta_interactiva,
-                    '$metadata')";
+                    '$metadata',
+                    '".date('Y-m-d H:i:s')."')";
     
                 try {
                     $this->query($qry_insert);
+                    $id_cliente = $this->conexMySQL->insert_id;
                 } catch (Exception $e) {
                     error_log("Error al guardar la respuesta: " . $e->getMessage());
                     $codigo = "ERR";
@@ -408,7 +413,7 @@
             }
 
 
-            return[$codigo];
+            return[$codigo,$id_cliente];
         }
 
         public function actualizarIntencionWhats($params = null) {

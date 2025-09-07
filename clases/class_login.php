@@ -212,6 +212,12 @@
             return [$codigo, $data];
         }
 
+        public function renovarToken($params = null) {
+            $token = isset($params["token"]) ? $params["token"] : null;
+            list($codigo,$response) = $this->renovarTokenUtilidades($token);
+            return [$codigo,$response];
+        }
+
     }
 
 ?>
