@@ -429,7 +429,7 @@
                             'description' => 'Cargo inicial para suscripción',
                             'device_session_id' => $device_session_id,
                             'use_3d_secure' => true,
-                            'redirect_url' => 'https://codeforyou.com.mx/dev/app_code4you/openpay.php'
+                            'redirect_url' => 'code4you://callback'
                         ];
 
                         $charge = $customer->charges->create($chargeRequest);
