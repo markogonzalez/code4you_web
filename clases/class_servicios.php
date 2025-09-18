@@ -440,7 +440,7 @@
                                 $codigo  = "3DS_REQUIRED";
                                 $mensaje = "Redirigir al banco para autenticación";
                                 $url_3ds = $charge->payment_method->url ?? null;
-
+                                // Inserta como pendiente
                                 $this->query("INSERT INTO master_pagos (
                                     id_usuario, id_servicio, id_plan, id_metodo, monto, referencia, estatus, fecha_pago, device_id
                                 ) VALUES (
@@ -450,9 +450,17 @@
                                 break;
 
                             case "charge_pending":
-                                $codigo  = "PENDIENTE";
-                                $mensaje = "El cargo está en validación con el banco.";
-
+                                if (isset($charge->payment_method->url)) {
+                                    // 🔹 Caso con URL → igual que in_progress
+                                    $codigo  = "3DS_REQUIRED";
+                                    $mensaje = "Redirigir al banco para autenticación";
+                                    $url_3ds = $charge->payment_method->url;
+                                } else {
+                                    // 🔹 Caso sin URL → esperar webhook
+                                    $codigo  = "PENDIENTE";
+                                    $mensaje = "El cargo está pendiente de validación bancaria.";
+                                }
+                                // Inserta como pendiente
                                 $this->query("INSERT INTO master_pagos (
                                     id_usuario, id_servicio, id_plan, id_metodo, monto, referencia, estatus, fecha_pago, device_id
                                 ) VALUES (
@@ -469,39 +477,40 @@
                                     "id_openpay"        => $id_openpay,
                                     "id_usuario"        => $id_usuario,
                                 ]);
-                                if($tarjeta[0]!="OK"){
+                                if ($tarjeta[0]!="OK") {
                                     $codigo  = "ERR";
                                     $mensaje = $tarjeta[1]['mensaje'];
-                                } else {
-                                    $id_tarjeta = $tarjeta[1]['id_tarjeta'];
-
-                                    // Crear suscripción
-                                    $subscriptionDataRequest = [
-                                        "trial_end_date" => date("Y-m-d"),
-                                        'plan_id'        => $id_plan_openpay,
-                                        'card_id'        => $id_tarjeta
-                                    ];
-
-                                    $subscription  = $customer->subscriptions->add($subscriptionDataRequest);
-                                    $estatus_sus   = $subscription->status == 'active' ? 'activa' : 'error';
-                                    $fecha_proximo = $subscription->charge_date ?? null;
-
-                                    $this->query("INSERT INTO servicios_suscripciones (
-                                        id_usuario, id_plan, id_openpay_suscripcion, id_tarjeta, estatus, fecha_inicio, fecha_proximo_cobro
-                                    ) VALUES (
-                                        '$id_usuario','$id_plan','{$subscription->id}','$id_tarjeta','$estatus_sus',
-                                        '{$subscription->trial_end_date}','$fecha_proximo'
-                                    )");
-
-                                    $this->query("INSERT INTO master_pagos (
-                                        id_usuario, id_servicio, id_plan, id_metodo, monto, referencia, estatus, fecha_pago, device_id
-                                    ) VALUES (
-                                        '$id_usuario','$id_servicio','$id_plan','$id_metodo_pago','$precio',
-                                        '{$subscription->id}','pagado','".date("Y-m-d H:i:s")."','$device_session_id'
-                                    )");
-
-                                    $mensaje = "Suscripción creada exitosamente con 3D Secure.";
+                                    break;
                                 }
+
+                                $id_tarjeta = $tarjeta[1]['id_tarjeta'];
+
+                                // Crear suscripción
+                                $subscriptionDataRequest = [
+                                    "trial_end_date" => date("Y-m-d"),
+                                    'plan_id'        => $id_plan_openpay,
+                                    'card_id'        => $id_tarjeta
+                                ];
+                                $subscription  = $customer->subscriptions->add($subscriptionDataRequest);
+
+                                $estatus_sus   = $subscription->status == 'active' ? 'activa' : 'error';
+                                $fecha_proximo = $subscription->charge_date ?? null;
+
+                                $this->query("INSERT INTO servicios_suscripciones (
+                                    id_usuario, id_plan, id_openpay_suscripcion, id_tarjeta, estatus, fecha_inicio, fecha_proximo_cobro
+                                ) VALUES (
+                                    '$id_usuario','$id_plan','{$subscription->id}','$id_tarjeta','$estatus_sus',
+                                    '{$subscription->trial_end_date}','$fecha_proximo'
+                                )");
+
+                                $this->query("INSERT INTO master_pagos (
+                                    id_usuario, id_servicio, id_plan, id_metodo, monto, referencia, estatus, fecha_pago, device_id
+                                ) VALUES (
+                                    '$id_usuario','$id_servicio','$id_plan','$id_metodo_pago','$precio',
+                                    '{$subscription->id}','pagado','".date("Y-m-d H:i:s")."','$device_session_id'
+                                )");
+
+                                $mensaje = "Suscripción creada exitosamente con 3D Secure.";
                                 break;
 
                             case "failed":
