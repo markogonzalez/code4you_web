@@ -20,73 +20,60 @@ class WebhookOpenPay extends utilidades{
             if (!$event) {
                 $codigo  = "ERR";
                 $mensaje = "Payload inválido";
-            } else {
+            } 
+            // 🔹 1. Caso verificación inicial
+            elseif (isset($event['verification_code'])) {
+                $verification_code = $event['verification_code'];
+
+                // Guardar en logs
+                $this->query("INSERT INTO openpay_webhooks (evento, referencia, payload, observaciones) 
+                              VALUES ('verificacion',
+                                      '".$this->cleanQuery($verification_code)."',
+                                      '".$this->cleanQuery(json_encode($event))."',
+                                      'Código de verificación recibido')");
+
+                $mensaje = "Código de verificación recibido: ".$verification_code;
+
+                // 👀 Mostrar en pantalla para copiarlo directo
+                echo $mensaje;
+                http_response_code(200);
+                exit;
+            } 
+            // 🔹 2. Eventos normales
+            else {
                 $tipo_evento = $event['type'] ?? '';
                 $data        = $event['transaction'] ?? [];
 
                 $id_cargo = $data['id'] ?? null;
-                $estatus  = $data['status'] ?? null;
-                $monto    = $data['amount'] ?? 0;
 
-                // Guardar siempre en logs
+                // Guardar en logs
                 $this->query("INSERT INTO openpay_webhooks (evento, referencia, payload) 
                               VALUES ('".$this->cleanQuery($tipo_evento)."',
                                       '".$this->cleanQuery($id_cargo)."',
                                       '".$this->cleanQuery(json_encode($event))."')");
 
-                if (!$id_cargo) {
-                    $codigo  = "ERR";
-                    $mensaje = "No se recibió transaction_id";
-                } else {
-                    // Validar contra OpenPay
-                    try {
-                        $openpay  = $this->openpay();
-                        $charge   = $openpay->charges->get($id_cargo);
-
-                        if ($charge->id !== $id_cargo) {
-                            $codigo  = "ERR";
-                            $mensaje = "El cargo no coincide en OpenPay";
-                        }
-                    } catch (Exception $e) {
-                        $codigo  = "ERR";
-                        $mensaje = "Error validando origen: ".$e->getMessage();
-                    }
-
-                    // Procesar evento
-                    if ($codigo == "OK") {
-                        switch ($tipo_evento) {
-                            case "charge.succeeded":
-                                $this->query("UPDATE master_pagos 
-                                              SET estatus='pagado' 
-                                              WHERE referencia='$id_cargo'");
-                                $mensaje = "Cargo $id_cargo confirmado como pagado.";
-                                break;
-
-                            case "charge.failed":
-                                $this->query("UPDATE master_pagos 
-                                              SET estatus='rechazado' 
-                                              WHERE referencia='$id_cargo'");
-                                $mensaje = "Cargo $id_cargo rechazado.";
-                                break;
-
-                            case "charge.cancelled":
-                                $this->query("UPDATE master_pagos 
-                                              SET estatus='cancelado' 
-                                              WHERE referencia='$id_cargo'");
-                                $mensaje = "Cargo $id_cargo cancelado.";
-                                break;
-
-                            case "charge.refunded":
-                                $this->query("UPDATE master_pagos 
-                                              SET estatus='reembolsado' 
-                                              WHERE referencia='$id_cargo'");
-                                $mensaje = "Cargo $id_cargo reembolsado.";
-                                break;
-
-                            default:
-                                $mensaje = "Evento $tipo_evento recibido y logueado.";
-                                break;
-                        }
+                // Procesar cargos como antes (succeeded, failed, etc.)
+                if ($id_cargo && $tipo_evento) {
+                    switch ($tipo_evento) {
+                        case "charge.succeeded":
+                            $this->query("UPDATE master_pagos SET estatus='pagado' WHERE referencia='$id_cargo'");
+                            $mensaje = "Cargo $id_cargo confirmado como pagado.";
+                            break;
+                        case "charge.failed":
+                            $this->query("UPDATE master_pagos SET estatus='rechazado' WHERE referencia='$id_cargo'");
+                            $mensaje = "Cargo $id_cargo rechazado.";
+                            break;
+                        case "charge.cancelled":
+                            $this->query("UPDATE master_pagos SET estatus='cancelado' WHERE referencia='$id_cargo'");
+                            $mensaje = "Cargo $id_cargo cancelado.";
+                            break;
+                        case "charge.refunded":
+                            $this->query("UPDATE master_pagos SET estatus='reembolsado' WHERE referencia='$id_cargo'");
+                            $mensaje = "Cargo $id_cargo reembolsado.";
+                            break;
+                        default:
+                            $mensaje = "Evento $tipo_evento recibido y logueado.";
+                            break;
                     }
                 }
             }
@@ -96,7 +83,6 @@ class WebhookOpenPay extends utilidades{
             $mensaje = "Error inesperado: ".$e->getMessage();
         }
 
-        // SIEMPRE devolver 200 a OpenPay
         http_response_code(200);
 
         return [$codigo, ["mensaje"=>$mensaje]];
