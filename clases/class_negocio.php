@@ -470,7 +470,7 @@
             $fin_dia = strtotime("$fecha $hora_fin");
 
             // 3. Obtener citas ya agendadas ese día
-            $sqlCitas = "SELECT hora_inicio, duracion FROM master_citas 
+            $sqlCitas = "SELECT hora_inicio, duracion FROM negocio_citas 
                         WHERE id_usuario = $id_trabajador AND fecha = '$fecha' AND estado = 'confirmada'";
             $resCitas = $this->query($sqlCitas);
             $bloques = [];

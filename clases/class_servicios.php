@@ -143,6 +143,37 @@
 
         }
 
+        public function getMetodoPago($params=null){
+            
+            $codigo = "OK";
+            $mensaje = "";
+            $data = [];
+            $elementos = [];
+            
+            $query ="SELECT *
+                FROM catalogo_metodo_pago
+                WHERE status = 1";
+
+            $result = $this->query($query);
+          
+            if ($result->num_rows > 0) {
+                while ($metodo = $result->fetch_assoc()) {
+                    $elementos[] = $metodo;
+                }
+            } else {
+                $codigo  = "ERR";
+                $mensaje = "Sin resultados que mostrar";
+            }
+
+            $data = [
+                "mensaje" => $mensaje,
+                "elementos" => $elementos,
+            ];
+
+            return [$codigo, $data];
+
+        }
+
         public function getPlan($params=null){
             
             $codigo = "OK";
@@ -178,7 +209,7 @@
                     $formTarjeta = "";
                     $activo = "";
                     if($metodo['id_metodo']==1){
-                        $activo = "border-primary";
+                        // $activo = "border-primary";
                         $year = intval(date("Y"));
                         $opciones_year = "<option value=''>Año</option>";
                         for ($i=0; $i <=10; $i++) {
@@ -273,7 +304,7 @@
                                     <img src="'.$this->ruta.'/assets/img/metodos_pago/'.$metodo['imagen'].'" class="w-100 mb-3" >
                                     <h5 class="fw-bold">'.$metodo['metodo_pago'].'</h5>
                                     <div class="text-muted">'.$metodo['descripcion'].'</div>
-                                    '.$formTarjeta.'
+                                    
                                     </div>
                                 </div>
                             </div>';
@@ -341,125 +372,172 @@
 
         }
 
-        public function crearSuscripcion($params = null){
-            $codigo = "OK";
-            $mensaje = "";
-            $data = [];
+        public function crearSuscripcionCon3DS($params = null){
+            $codigo    = "OK";
+            $mensaje   = "";
+            $id_openpay= null;
+            $url_3ds   = null;
 
-            $token_openpay    = $this->cleanQuery($params["token_id"] ?? "");
-            $device_session_id    = $this->cleanQuery($params["deviceIdHiddenFieldName"] ?? "");
-            $id_plan    = $this->cleanQuery($params["id_plan"] ?? 0);
-            $id_plan_openpay    = $this->cleanQuery($params["id_plan_openpay"] ?? "");
+            $token_openpay = isset($params["token_id"]) ? $this->cleanQuery($params["token_id"]) : "";
+            $device_session_id = isset($params["deviceIdHiddenFieldName"]) ? $this->cleanQuery($params["deviceIdHiddenFieldName"]) : "";
+            $id_plan = isset($params["id_plan"]) ? $this->cleanQuery($params["id_plan"]) : 0;
+            $id_servicio = isset($params["id_servicio"]) ? $this->cleanQuery($params["id_servicio"]) : 0;
+            $id_plan_openpay = isset($params["id_plan_openpay"]) ? $this->cleanQuery($params["id_plan_openpay"]) : "";
+            $precio = isset($params["precio"]) ? $this->cleanQuery($params["precio"]) : 0;
+            $id_metodo_pago = isset($params["id_metodo_pago"]) ? $this->cleanQuery($params["id_metodo_pago"]) : 0;
 
-            if($this->sesion){
-                $id_usuario = $this->sesion['id_usuario'];
-                $usuario    = $this->getUsuario(['id_usuario'=>$id_usuario]);
-                $id_openpay = $usuario['id_openpay'];
-                if (empty($id_openpay)) {
-                    // Crear usuario en open pay para obtener id
-                    $add = $this->addOpenpay([
-                        "cliente"=>[
-                            'external_id' => $usuario['id_usuario'],
-                            'name' => $usuario['nombre'],
-                            'last_name' => $usuario['apellidos'],
-                            'email' => $usuario['correo'],
-                            'requires_account' => false,
-                            'phone_number' => $usuario['celular'],
-                        ],
-                        "usuario"=>$usuario
-                    ]);
-                    if($add[0]!="OK"){
-                        return ["ERR",["mensaje"=>$add[1]['mensaje']]];
-                    }
-                    $id_openpay = $add[1]['id_openpay'];
-                }
-                // Añadir una tarjeta al usuario con el id de openpay
-                $tarjeta =$this->cardOpenpay([
-                    'token_id' => $token_openpay,
-                    'device_session_id' => $device_session_id,
-                    "id_openpay"=>$id_openpay,
-                    "id_usuario"=>$id_usuario,
-                ]);
-                if($tarjeta[0]!="OK"){
-                    return ["ERR",["mensaje"=>$tarjeta[1]['mensaje']]];
-                }
-                $id_tarjeta = $tarjeta[1]['id_tarjeta'];
-
-                // Crear suscripcion
-                try{
-                    $openpay = $this->openpay();
-                    $customer = $openpay->customers->get($id_openpay);
-                    $subscriptionDataRequest = [
-                        "trial_end_date" => date("Y-m-d"),
-                        'plan_id' => $id_plan_openpay,
-                        'card_id' => $id_tarjeta
-                    ];
-                    $subscription = $customer->subscriptions->add($subscriptionDataRequest);
-                    $estatus_sus = $subscription->status == 'active' ? 'activa' : 'error';
-                    $fecha_proximo = $subscription->charge_date ?? null;
-                    $qry = "INSERT INTO servicios_suscripciones (
-                        id_usuario,
-                        id_plan,
-                        id_openpay_suscripcion,
-                        id_tarjeta,
-                        estatus,
-                        fecha_inicio,
-                        fecha_proximo_cobro
-                    ) VALUES (
-                        '$id_usuario',
-                        '$id_plan',
-                        '$subscription->id',
-                        '$id_tarjeta',
-                        '$estatus_sus',
-                        '$subscription->trial_end_date',
-                        '$fecha_proximo'
-                    )";
-
-                    $res = $this->query($qry);
-                    $mensaje = "Pago realizado exitosamente";
-
-                }catch(OpenpayApiTransactionError $e){
-                    error_log("[Openpay - TransactionError] " . $e->getMessage());
-                    $codigo = "ERROR";
-                    $mensaje = "No se pudo completar la operación. Intenta más tarde.";
-
-                }catch(OpenpayApiRequestError $e){
-                    error_log("[Openpay - RequestError] " . $e->getMessage());
-                    $codigo = "ERROR";
-                    $mensaje = "Hubo un error en la solicitud. Verifica tus datos.";
-
-                }catch(OpenpayApiConnectionError $e){
-                    error_log("[Openpay - ConnectionError] " . $e->getMessage());
-                    $codigo = "ERROR";
-                    $mensaje = "No pudimos conectar con el servicio de pagos. Intenta más tarde.";
-
-                }catch(OpenpayApiAuthError $e){
-                    error_log("[Openpay - AuthError] " . $e->getMessage());
-                    $codigo = "ERROR";
-                    $mensaje = "Error de autenticación con Openpay. Contacta a soporte.";
-
-                }catch(OpenpayApiError $e){
-                    error_log("[Openpay - ApiError] " . $e->getMessage());
-                    $codigo = "ERROR";
-                    $mensaje = "Ocurrió un error inesperado. Intenta nuevamente.";
-
-                }catch(Exception $e){
-                    error_log("[Openpay - GeneralError] " . $e->getMessage());
-                    $codigo = "ERROR";
-                    $mensaje = $e->getMessage();
-                }
-                
-            }else{
-                $codigo = "SESION";
+            if (empty($this->sesion)) {
+                $codigo  = "SESION";
                 $mensaje = "Inicia sesión para continuar";
+            } else {
+                try {
+                    $id_usuario = $this->sesion['id_usuario'];
+                    $usuario    = $this->getUsuario(['id_usuario'=>$id_usuario]);
+                    $id_openpay = $usuario['id_openpay'];
+
+                    // 1. Crear cliente si no existe
+                    if (empty($id_openpay)) {
+                        $add = $this->addOpenpay([
+                            "cliente"=>[
+                                'external_id' => $usuario['id_usuario'],
+                                'name' => $usuario['nombre'],
+                                'last_name' => $usuario['apellidos'],
+                                'email' => $usuario['correo'],
+                                'requires_account' => false,
+                                'phone_number' => $usuario['celular'],
+                            ],
+                            "usuario"=>$usuario
+                        ]);
+                        if($add[0]!="OK"){
+                            $codigo  = "ERR";
+                            $mensaje = $add[1]['mensaje'];
+                        } else {
+                            $id_openpay = $add[1]['id_openpay'];
+                        }
+                    }
+
+                    if ($codigo == "OK") {
+                        $openpay  = $this->openpay();
+                        $customer = $openpay->customers->get($id_openpay);
+
+                        // 2. Cargo inicial
+                        $chargeRequest = [
+                            'method' => 'card',
+                            'source_id' => $token_openpay,
+                            'amount' => $precio, // puedes poner 1 si solo validas
+                            'currency' => 'MXN',
+                            'description' => 'Cargo inicial para suscripción',
+                            'device_session_id' => $device_session_id,
+                            'use_3d_secure' => true,
+                            'redirect_url' => 'https://codeforyou.com.mx/dev/app_code4you/callback.php'
+                        ];
+
+                        $charge = $customer->charges->create($chargeRequest);
+
+                        // 3. Manejo de estados
+                        switch ($charge->status) {
+                            case "in_progress":
+                                $codigo  = "3DS_REQUIRED";
+                                $mensaje = "Redirigir al banco para autenticación";
+                                $url_3ds = $charge->payment_method->url ?? null;
+
+                                $this->query("INSERT INTO master_pagos (
+                                    id_usuario, id_servicio, id_plan, id_metodo, monto, referencia, estatus, fecha_pago, device_id
+                                ) VALUES (
+                                    '$id_usuario','$id_servicio','$id_plan','$id_metodo_pago','$precio',
+                                    '{$charge->id}','pendiente','".date("Y-m-d H:i:s")."','$device_session_id'
+                                )");
+                                break;
+
+                            case "charge_pending":
+                                $codigo  = "PENDIENTE";
+                                $mensaje = "El cargo está en validación con el banco.";
+
+                                $this->query("INSERT INTO master_pagos (
+                                    id_usuario, id_servicio, id_plan, id_metodo, monto, referencia, estatus, fecha_pago, device_id
+                                ) VALUES (
+                                    '$id_usuario','$id_servicio','$id_plan','$id_metodo_pago','$precio',
+                                    '{$charge->id}','pendiente','".date("Y-m-d H:i:s")."','$device_session_id'
+                                )");
+                                break;
+
+                            case "completed":
+                                // Guardar tarjeta
+                                $tarjeta = $this->cardOpenpay([
+                                    'token_id'          => $token_openpay,
+                                    'device_session_id' => $device_session_id,
+                                    "id_openpay"        => $id_openpay,
+                                    "id_usuario"        => $id_usuario,
+                                ]);
+                                if($tarjeta[0]!="OK"){
+                                    $codigo  = "ERR";
+                                    $mensaje = $tarjeta[1]['mensaje'];
+                                } else {
+                                    $id_tarjeta = $tarjeta[1]['id_tarjeta'];
+
+                                    // Crear suscripción
+                                    $subscriptionDataRequest = [
+                                        "trial_end_date" => date("Y-m-d"),
+                                        'plan_id'        => $id_plan_openpay,
+                                        'card_id'        => $id_tarjeta
+                                    ];
+
+                                    $subscription  = $customer->subscriptions->add($subscriptionDataRequest);
+                                    $estatus_sus   = $subscription->status == 'active' ? 'activa' : 'error';
+                                    $fecha_proximo = $subscription->charge_date ?? null;
+
+                                    $this->query("INSERT INTO servicios_suscripciones (
+                                        id_usuario, id_plan, id_openpay_suscripcion, id_tarjeta, estatus, fecha_inicio, fecha_proximo_cobro
+                                    ) VALUES (
+                                        '$id_usuario','$id_plan','{$subscription->id}','$id_tarjeta','$estatus_sus',
+                                        '{$subscription->trial_end_date}','$fecha_proximo'
+                                    )");
+
+                                    $this->query("INSERT INTO master_pagos (
+                                        id_usuario, id_servicio, id_plan, id_metodo, monto, referencia, estatus, fecha_pago, device_id
+                                    ) VALUES (
+                                        '$id_usuario','$id_servicio','$id_plan','$id_metodo_pago','$precio',
+                                        '{$subscription->id}','pagado','".date("Y-m-d H:i:s")."','$device_session_id'
+                                    )");
+
+                                    $mensaje = "Suscripción creada exitosamente con 3D Secure.";
+                                }
+                                break;
+
+                            case "failed":
+                                $codigo  = "ERR";
+                                $mensaje = "El cargo fue rechazado por el banco.";
+                                break;
+
+                            case "cancelled":
+                                $codigo  = "ERR";
+                                $mensaje = "El cargo fue cancelado.";
+                                break;
+
+                            case "refunded":
+                                $codigo  = "ERR";
+                                $mensaje = "El cargo fue reembolsado.";
+                                break;
+
+                            default:
+                                $codigo  = "ERR";
+                                $mensaje = "Estado inesperado: ".$charge->status;
+                                break;
+                        }
+                    }
+
+                } catch (Exception $e) {
+                    $codigo  = "ERR";
+                    $mensaje = "Tarjeta Rechazada";
+                    error_log("Error inesperado: ".$e->getMessage());
+                }
             }
 
-             $data = [
-                "mensaje" => $mensaje,
-                "id_openpay" => $id_openpay,
-            ];
-
-            return [$codigo, $data];
+            return [$codigo, [
+                "mensaje"   => $mensaje,
+                "id_openpay"=> $id_openpay,
+                "url_3ds"   => $url_3ds
+            ]];
         }
 
         public function validarSubscripcion($params = null){
@@ -495,7 +573,7 @@
         }
         
         function addOpenpay($params = null){
-            error_log(print_r($params,true));
+            // error_log(print_r($params,true));
             
             $codigo = "OK";
             $mensaje = "";
@@ -575,35 +653,10 @@
                 $res = $this->query($qry_insert);
 
 
-            } catch (OpenpayApiTransactionError $e) {
-                error_log("[Openpay - TransactionError] " . $e->getMessage());
-                $codigo = "ERROR";
-                $mensaje = "No se pudo completar la operación. Intenta más tarde.";
-
-            } catch (OpenpayApiRequestError $e) {
-                error_log("[Openpay - RequestError] " . $e->getMessage());
-                $codigo = "ERROR";
-                $mensaje = "Hubo un error en la solicitud. Verifica tus datos.";
-
-            } catch (OpenpayApiConnectionError $e) {
-                error_log("[Openpay - ConnectionError] " . $e->getMessage());
-                $codigo = "ERROR";
-                $mensaje = "No pudimos conectar con el servicio de pagos. Intenta más tarde.";
-
-            } catch (OpenpayApiAuthError $e) {
-                error_log("[Openpay - AuthError] " . $e->getMessage());
-                $codigo = "ERROR";
-                $mensaje = "Error de autenticación con Openpay. Contacta a soporte.";
-
-            } catch (OpenpayApiError $e) {
-                error_log("[Openpay - ApiError] " . $e->getMessage());
-                $codigo = "ERROR";
-                $mensaje = "Ocurrió un error inesperado. Intenta nuevamente.";
-
             } catch (Exception $e) {
                 error_log("[Openpay - GeneralError] " . $e->getMessage());
                 $codigo = "ERROR";
-                $mensaje = $e->getMessage();
+                $mensaje = "Tarjeta Rechazada";
             }
 
             return [$codigo,[

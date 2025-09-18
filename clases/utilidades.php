@@ -5,6 +5,7 @@
     use Firebase\JWT\JWT;
     use Firebase\JWT\Key;
     use Openpay\Data\Openpay;
+    
 
 	class utilidades extends database{
         public $sesion = [];
@@ -277,9 +278,16 @@
                 $id = $row['id_modulo'];
 
                 // Validaciones
-                if($row['vista']!=""){
+                if ($row['vista']!="") {
                     if (!isset($arrPermisos['permisos'][$id]) || !$arrPermisos['permisos'][$id]['r']) continue;
+
+                    // Validar pago directo
                     if ($row['pago'] == 1 && !isset($modulos_pagados[$id])) continue;
+
+                    // Validar si el padre requiere pago y no está cubierto
+                    if ($row['id_padre'] > 0 && isset($modulos[$row['id_padre']])) {
+                        if ($modulos[$row['id_padre']]['pago'] == 1 && !isset($modulos_pagados[$row['id_padre']])) continue;
+                    }
                 }
 
                 $modulos[$id] = $row;
@@ -304,6 +312,10 @@
                     $estructura_menu[$id] = $item + ['hijos' => []];
                 } else {
                     if (isset($estructura_menu[$id_padre])) {
+                        // Validar si el padre está pagado
+                        if ($modulos[$id_padre]['pago'] == 1 && !isset($modulos_pagados[$id_padre])) {
+                            continue; // No meter hijos si el padre es de pago y no está pagado
+                        }
                         $estructura_menu[$id_padre]['hijos'][] = $item;
                     } else {
                         // En caso de inconsistencia

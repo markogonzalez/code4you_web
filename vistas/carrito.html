@@ -1,0 +1,223 @@
+<div class="row g-5 g-xl-8">
+    <h2 class="card-title align-items-start flex-column">
+        <span class="card-label fw-bold text-gray-800">Carrito de compras</span>
+    </h2>
+    <!-- Div de planes -->
+    <div class="card card-flush h-xl-100" id="divPlanes">
+        <div class="card-header pt-7">
+            <h3 class="card-title align-items-start flex-column">
+                <span class="card-label fw-bold text-gray-800">Selecciona la opción que mas se ajuste a tus necesidades</span>
+            </h3>
+        </div>
+        <div class="card-body p-9">
+            <div class="nav-group mx-auto mb-3" id="divBotones"></div> 
+            <div class="row g-10" id="planes_servicio"></div>          
+        </div>
+    </div>
+    <div class="card card-flush h-xl-100" id="divMetodos" style="display: none;">
+        <div class="card-header pt-7">
+            <h3 class="card-title align-items-start flex-column">
+                <span class="card-label fw-bold text-gray-800">Selecciona un método de pago</span>
+            </h3>
+        </div>
+        <div class="card-body p-9">
+            <div class="row g-10" id="metodos_pago"></div>          
+        </div>
+        <div class="card-footer d-flex justify-content-between py-6 px-9">
+            <button type="button" class="btn btn-secondary" onclick="mostrar_ocultar('divPlanes','divMetodos')">
+                <span class="indicator-label">Regresar</span>
+            </button>
+            <button type="button" class="btn btn-primary" disabled id="btn_continuar_pago">
+                <span class="indicator-label">Continuar</span>
+            </button>
+        </div>
+    </div>
+    <div class="card card-flush h-xl-100" id="divResumen" style="display: none;">
+        <div class="card-header pt-7">
+            <h3 class="card-title align-items-start flex-column">
+                <span class="card-label fw-bold text-gray-800"><i class="ki-solid ki-receipt fs-2 me-2 text-primary"></i> Resumen del Pedido</span>
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <!--begin::Table-->
+                <table class="table align-middle table-row-bordered mb-0 fs-6 gy-5 min-w-300px">
+                    <tbody class="fw-semibold text-gray-600">
+                        <tr>
+                            <td class="text-muted">
+                                <div class="d-flex align-items-center">
+                                    <i class="ki-solid ki-calendar fs-2 me-2"></i>Fecha de pedido
+                                </div>
+                            </td>
+                            <td class="fw-bold text-end" id="texto_fecha"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">
+                                <div class="d-flex align-items-center">
+                                    <i class="ki-solid ki-wallet fs-2 me-2"></i>Método de pago
+                                </div>
+                            </td>
+                            <td class="fw-bold text-end"><span id="texto_metodo"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">
+                                <div class="d-flex align-items-center">
+                                    <i class="ki-solid ki-purchase fs-2 me-2"></i>Servicio
+                                </div>
+                            </td>
+                            <td class="fw-bold text-end"><span id="texto_servicio"></span>
+                            </td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+                <!--end::Table-->
+            </div>
+
+            <!-- Total -->
+            <div class="separator my-6"></div>
+            <div class="d-flex justify-content-between align-items-center flex-column">
+                <div class="fs-4 fw-semibold text-gray-700 d-flex">Total a pagar</div>
+                <div class="fs-2x fw-bold text-primary d-flex" id="resumen_total"></div>
+            </div>
+            <form class="mt-3" id="formTarjeta" style="display: none;">
+                <input type="hidden" name="token_id" id="token_id">
+                <input type="hidden" name="id_plan" id="id_plan">
+                <input type="hidden" name="id_plan_openpay" id="id_plan_openpay">
+
+                <div class="d-flex flex-column mb-7 fv-row">
+                    <input type="text" name
+                    ="titular" class="form-control form-control-solid titular" placeholder="Nombre en tarjeta" data-openpay-card="holder_name" autocomplete="off" />
+                </div>
+
+                <div class="d-flex flex-column mb-7 fv-row">
+                <input type="text" name
+                ="card_number" class="form-control form-control-solid" placeholder="0000 0000 0000 0000" data-openpay-card="card_number" autocomplete="off" pattern="\d{16}" inputmode="numeric"/>
+                </div>
+
+                <div class="row mb-7">
+                    <div class="col-md-8 fv-row">
+                        <div class="row fv-row">
+                            <div class="col-6">
+                                <select name="card_expiry_month" class="form-select form-select-solid" data-openpay-card="expiration_month" required>
+                                    <option value="">Mes</option>
+                                    <option value="01">01</option>
+                                    <option value="02">02</option>
+                                    <option value="03">03</option>
+                                    <option value="04">04</option>
+                                    <option value="05">05</option>
+                                    <option value="06">06</option>
+                                    <option value="07">07</option>
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <select name="card_expiry_year" id="anio_expiracion" class="form-select form-select-solid" data-openpay-card="expiration_year" data-control="select2" data-hide-search="true" data-placeholder="Año" required>
+                                    
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column mb-7 fv-row">
+                    <div class="col-md-4 fv-row">
+                        <div class="position-relative">
+                            <input type="text" class="form-control form-control-solid"
+                                placeholder="CVV" autocomplete="off"
+                                name
+                                ="card_cvv"
+                                data-openpay-card="cvv2" minlength="3" maxlength="4"
+                                pattern="\d{3,4}" inputmode="numeric" required />
+                            <div class="position-absolute translate-middle-y top-50 end-0 me-3">
+                                <i class="ki-duotone ki-credit-cart fs-2hx">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column mb-7 fv-row">
+                    <div>
+                        <h5>Transacciones realizadas vía:</h5>
+                        <img src="assets/img/metodos_pago/openpay.png">
+                    </div>
+                    <div class="mt-3">
+                        <p class="text-bold">Tus pagos se realizan de forma segura con encriptación de 256 bits</p>
+                        <img src="assets/img/metodos_pago/security.png">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer d-flex justify-content-between py-6 px-9">
+            <button type="button" class="btn btn-secondary" onclick="mostrar_ocultar('divMetodos','divResumen')">
+                <span class="indicator-label">Regresar</span>
+            </button>
+            <button type="button" class="btn btn-primary" id="btn_confirmar_pago">
+                <span class="indicator-label">Confirmar y pagar</span>
+            </button>
+        </div>
+    </div>
+
+    <!--begin::Referencia de Pago-->
+    <div class="card card-flush h-xl-100" id="divReferencia" style="display:none;">
+        <div class="card-header pt-7">
+            <h3 class="card-title align-items-start flex-column">
+                <span class="card-label fw-bold text-gray-800">
+                    <i class="ki-solid ki-credit-cart fs-2 me-2 text-primary"></i>
+                    Datos para tu pago
+                </span>
+            </h3>
+        </div>
+        <div class="card-body p-9">
+            <div class="table-responsive">
+                <table class="table align-middle table-row-bordered mb-0 fs-6 gy-5 min-w-300px">
+                    <tbody class="fw-semibold text-gray-600">
+                        <tr>
+                            <td class="text-muted">
+                                <div class="d-flex align-items-center">
+                                    <i class="ki-solid ki-barcode fs-2 me-2"></i>Referencia
+                                </div>
+                            </td>
+                            <td class="fw-bold text-end text-primary fs-5">
+                                <span id="texto_referencia"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">
+                                <div class="d-flex align-items-center">
+                                    <i class="ki-solid ki-calendar fs-2 me-2"></i>Vigencia
+                                </div>
+                            </td>
+                            <td class="fw-bold text-end">
+                                <span id="texto_vigencia"></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Nota de pago -->
+            <div class="alert alert-warning d-flex align-items-center p-5 mt-6">
+                <i class="ki-solid ki-information fs-2hx me-4 text-warning"></i>
+                <div class="d-flex flex-column">
+                    <h5 class="mb-1 text-warning fw-bold">Importante</h5>
+                    <span class="text-gray-700">Tu referencia tiene una vigencia limitada. Realiza el pago antes de la fecha indicada para evitar la cancelación.</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-end py-6 px-9">
+            <button onclick="cargarVista('servicios')" class="btn btn-primary">
+                <i class="ki-solid ki-check-circle fs-2 me-2"></i>
+                Listo
+            </button>
+        </div>
+    </div>
+    <!--end::Referencia de Pago-->
