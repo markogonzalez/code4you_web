@@ -555,6 +555,35 @@
             $elementos = [];
         }
 
+        public function estadoPago($params = null){
+            $codigo  = "OK";
+            $mensaje = "";
+            $estatus = "pendiente";
+
+            try {
+                $referencia = $this->cleanQuery($params['referencia'] ?? "");
+                if (empty($referencia)) {
+                    $codigo  = "ERR";
+                    $mensaje = "Referencia requerida";
+                } else {
+                    $query_pago = "SELECT estatus FROM master_pagos WHERE referencia = '$referencia' ORDER BY id_pago DESC LIMIT 1";
+                    $res = $this->query($query_pago);
+                    if ($res->num_rows>0) {
+                        $pago = $res->fetch_assoc();
+                        $estatus = $pago['estatus'];
+                    } else {
+                        $codigo  = "ERR";
+                        $mensaje = "No se encontró la referencia.";
+                    }
+                }
+            } catch (Exception $e) {
+                $codigo  = "ERR";
+                $mensaje = "Error: ".$e->getMessage();
+            }
+
+            return [$codigo, ["mensaje"=>$mensaje, "estatus"=>$estatus]];
+        }
+
         public function eliminarUsuario($params = null){
             $codigo  = "OK";
             $mensaje = "";
