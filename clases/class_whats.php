@@ -487,7 +487,7 @@ class whats extends utilidades {
 
     function emitirSocket($evento, $sala, $data, $namespace = "code4you") {
         error_log("🧪 Emitiendo evento: $evento a la sala $sala con datos: " . json_encode($data));
-        $url = "http://localhost:3000/api"; // O IP real si estás en producción
+        $url = "https://becd44a30a00.ngrok-free.app/api"; // O IP real si estás en producción
 
         $payload = json_encode([
             "evento" => $evento,
