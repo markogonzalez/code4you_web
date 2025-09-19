@@ -72,7 +72,7 @@ class openAI extends utilidades {
 
         $url = "https://api.openai.com/v1/chat/completions";
         list($codigoApi, $response) = $this->request('POST', $url, [
-            "model" => "gpt-4o",
+            "model" => "gpt-5-nano",
             "messages" => [
                 [
                     "role" => "system",
@@ -83,7 +83,7 @@ class openAI extends utilidades {
                     "content" => $prompt
                 ]
             ],
-            "temperature" => 0.3
+            "temperature" => 1
         ]);
         
         if($codigoApi!="OK"){
