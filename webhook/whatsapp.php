@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     // ID DE PRUEBA CAMBIAR CUANDON TENGA EL DE INTERMEDICA
-    if($phoneId=="606059029264648"){
+    if($phoneId=="777051555494674"){
         
         $url = "https://codeforyou.com.mx/dev/intermedica/webhook.php";
         $secret_token = TOKEN_C4Y;
