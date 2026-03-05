@@ -59,9 +59,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         error_log("📨 Webhook reenviado a Intermédica ($httpCode): $response");
         
-    }elseif($phoneId=="654563697390567"){
+    }elseif($phoneId=="606059029264648"){
         
-        $url = "http://registro.codeforyou.com.mx/webhook.php";
+        $url = "https://registro.codeforyou.com.mx/webhook.php";
         $secret_token = TOKEN_C4Y;
 
         $ch = curl_init($url);
