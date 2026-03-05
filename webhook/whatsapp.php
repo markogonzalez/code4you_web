@@ -59,6 +59,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         error_log("📨 Webhook reenviado a Intermédica ($httpCode): $response");
         
+    }elseif($phoneId=="654563697390567"){
+        
+        $url = "http://registro.codeforyou.com.mx/webhook.php";
+        $secret_token = TOKEN_C4Y;
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $raw_body);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'X-Dispatcher-Token: '.$secret_token       // tu token secreto
+        ]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        error_log("📨 Webhook reenviado a Registro SaaS ($httpCode): $response");
+        
     }else{
         $whats = new whats();
         if (isset($json["entry"][0]["changes"][0]["value"]["statuses"])) {
